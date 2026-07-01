@@ -37,21 +37,22 @@ README.md        Project documentation
 pip install -r requirements.txt
 ```
 
-3. Set your OpenAI API key.
+3. Create a local `.env` file.
 
-For the current PowerShell session:
-
-```powershell
-$env:OPENAI_API_KEY="your_api_key_here"
-```
-
-To set it permanently on Windows:
+You can copy the example file:
 
 ```powershell
-setx OPENAI_API_KEY "your_api_key_here"
+copy .env.example .env
 ```
 
-After using `setx`, close and reopen your terminal before running the bot.
+Then open `.env` and replace the placeholder with your real OpenAI API key:
+
+```text
+OPENAI_API_KEY=your_api_key_here
+OPENAI_MODEL=gpt-4o
+```
+
+The `.env` file is ignored by Git, so your real API key should stay on your computer and should not be pushed to GitHub.
 
 ## Usage
 
@@ -111,7 +112,8 @@ My Random Forest model has 99% training accuracy but 61% test accuracy. What is 
 ## Notes
 
 - Do not commit your API key to GitHub.
-- Keep secrets in environment variables, not in Python files.
+- Keep secrets in `.env` or environment variables, not in Python files.
+- Commit `.env.example`, but never commit `.env`.
 - DataBot is designed for learning and project support, not as a replacement for professional advice.
 
 ## License

@@ -1,5 +1,6 @@
 import os
 
+from dotenv import load_dotenv
 from openai import OpenAI
 
 
@@ -154,7 +155,14 @@ After identifying missing values, decide whether to remove, replace, or investig
 
 
 def main():
-    client = OpenAI()
+    load_dotenv()
+
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key or api_key == "your_api_key_here":
+        print("Missing OPENAI_API_KEY. Add your API key to the local .env file, then run DataBot again.")
+        return
+
+    client = OpenAI(api_key=api_key)
     model = os.getenv("OPENAI_MODEL", "gpt-4o")
 
     # The conversation history list -- this is how memory works.
