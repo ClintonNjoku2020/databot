@@ -1,19 +1,19 @@
-import os
+from openai import OpenAIError
 
-from dotenv import load_dotenv
-from openai import OpenAI
+from databot import create_client, get_api_key, get_model
+
+
+MAX_HISTORY_MESSAGES = 20
 
 
 def main():
-    load_dotenv()
-
-    api_key = os.getenv("OPENAI_API_KEY")
+    api_key = get_api_key()
     if not api_key or api_key == "your_api_key_here":
-        print("Missing OPENAI_API_KEY. Add your API key to the local .env file, then run this script again.")
+        print("Missing OPENAI_API_KEY. Add your API key, then run this script again.")
         return
 
-    client = OpenAI(api_key=api_key)
-    model = os.getenv("OPENAI_MODEL", "gpt-4o")
+    client = create_client(api_key)
+    model = get_model()
 
     messages = [
         {
@@ -33,14 +33,28 @@ def main():
         if user_input.lower() in {"exit", "quit"}:
             break
 
+        if not user_input:
+            continue
+
         messages.append({"role": "user", "content": user_input})
+        if len(messages) > MAX_HISTORY_MESSAGES + 1:
+            messages = [messages[0]] + messages[-MAX_HISTORY_MESSAGES:]
 
-        response = client.chat.completions.create(
-            model=model,
-            messages=messages,
-        )
+        try:
+            response = client.chat.completions.create(
+                model=model,
+                messages=messages,
+            )
+        except OpenAIError as error:
+            messages.pop()
+            print(f"Bot error: {error}")
+            print("Check your API key, model name, internet connection, billing status, or rate limits, then try again.")
+            continue
+        except KeyboardInterrupt:
+            print("\nChatbot stopped.")
+            break
 
-        assistant_message = response.choices[0].message.content
+        assistant_message = response.choices[0].message.content or "I could not generate a response."
         print(f"Bot: {assistant_message}")
 
         messages.append({"role": "assistant", "content": assistant_message})

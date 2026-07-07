@@ -1,6 +1,6 @@
 # DataBot
 
-DataBot is a command-line AI assistant designed to help with data science, data analytics, machine learning, statistics, Python, SQL, and related project workflows. It uses the OpenAI API with a custom system prompt so it can give structured, beginner-friendly answers for explanations, debugging, model evaluation, and data project code.
+DataBot is an AI assistant for data science, data analytics, machine learning, statistics, Python, SQL, and related project workflows. It includes a Streamlit web app and a command-line interface. It uses the OpenAI API with a custom system prompt so it can give structured, beginner-friendly answers for explanations, debugging, model evaluation, and data project code.
 
 ## Requirements
 
@@ -9,13 +9,13 @@ DataBot is a command-line AI assistant designed to help with data science, data 
 - Required Python libraries:
 
 ```powershell
-pip install openai python-dotenv
+pip install -r requirements.txt
 ```
 
-You can also install the project requirements with:
+If `pip` is not recognized on Windows, use:
 
 ```powershell
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 ## Setup
@@ -37,18 +37,39 @@ copy .env.example .env
 
 ```text
 OPENAI_API_KEY=your_api_key_here
-OPENAI_MODEL=gpt-4o
+OPENAI_MODEL=gpt-4o-mini
 ```
 
 The `.env` file is listed in `.gitignore`, so your real API key should stay on your computer and should not be pushed to GitHub.
 
-4. Run DataBot:
+4. For the Streamlit web app, you can also create `.streamlit/secrets.toml`:
+
+```toml
+OPENAI_API_KEY = "your_api_key_here"
+OPENAI_MODEL = "gpt-4o-mini"
+```
+
+The `.streamlit/secrets.toml` file is listed in `.gitignore`, so your real API key should not be pushed to GitHub.
+
+5. Run the web app:
+
+```powershell
+streamlit run app.py
+```
+
+Then open:
+
+```text
+http://localhost:8501
+```
+
+6. Or run DataBot in the terminal:
 
 ```powershell
 python databot.py
 ```
 
-5. Type a prompt after `You:`. To stop the bot, type:
+7. Type a prompt after `You:`. To stop the bot, type:
 
 ```text
 quit
@@ -78,6 +99,8 @@ red door = expensive house
 But in real life, the red door is probably not the true reason the house is expensive. The model has learned a random pattern from the training data instead of the real relationship.
 
 Key takeaway: overfitting means the model memorizes the training data instead of learning patterns that generalize to new data.
+
+Confidence: 5/5
 ```
 
 ### Example 2: Diagnosing Model Performance
@@ -102,6 +125,8 @@ Recommended fixes:
 3. Use cross-validation.
 4. Check for data leakage.
 5. Remove noisy or irrelevant features.
+
+Confidence: 5/5
 ```
 
 ### Example 3: Handling an Out-of-Scope Question
@@ -112,6 +137,8 @@ You: What is Amen?
 DataBot: I am DataBot, a specialist assistant for data science and machine learning, so I cannot answer that directly because it is outside my scope.
 
 I can help with a related data science topic, such as analyzing religious text data, building an NLP keyword classifier, or cleaning text data for sentiment analysis.
+
+Confidence: 5/5
 ```
 
 ## Prompt Engineering Techniques Used
@@ -130,12 +157,55 @@ The system prompt defines DataBot's role, behavior, scope, and output format. It
 
 ## What I Would Improve
 
-- Add better error handling for API failures, invalid API keys, network problems, and rate limits.
 - Add automated tests so changes to the prompt or command-line flow can be checked more safely.
-- Add a cleaner user interface, such as a simple web app or Streamlit app, so beginners can use DataBot without the command line.
+- Add conversation export so users can save useful answers from a terminal session.
+
+## Testing DataBot Manually
+
+Run the chatbot:
+
+```powershell
+python databot.py
+```
+
+Or run the Streamlit app:
+
+```powershell
+streamlit run app.py
+```
+
+Then try these prompts:
+
+```text
+Explain overfitting in machine learning with a simple example.
+```
+
+```text
+My model accuracy is stuck at 62%. What should I check?
+```
+
+```text
+What is Amen?
+```
+
+Expected behavior:
+
+- Data science questions should receive structured, beginner-friendly answers.
+- Diagnosis-style questions should use numbered sections.
+- Clearly out-of-scope questions should be redirected to a related data science topic.
+- Every answer should end with a confidence score from 1 to 5.
+
+## Troubleshooting
+
+- If you see `Missing OPENAI_API_KEY`, check that `.env` exists and contains your real API key.
+- If OpenAI rejects your API key, create or copy a valid API key from your OpenAI Platform project.
+- If OpenAI says the key has no available quota, check billing, credits, and project limits in your OpenAI Platform account.
+- If you see an API error, check your API key, model name, internet connection, billing status, and rate limits.
+- If the model name does not work for your account, update `OPENAI_MODEL` in `.env` and `.env.example`.
 
 ## Notes
 
 - Do not commit your real API key to GitHub.
 - Keep secrets in `.env` or environment variables, not in Python files.
-- Commit `.env.example`, but never commit `.env`.
+- For Streamlit, keep secrets in `.streamlit/secrets.toml`.
+- Commit `.env.example` and `.streamlit/config.toml`, but never commit `.env` or `.streamlit/secrets.toml`.

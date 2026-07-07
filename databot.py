@@ -1,12 +1,19 @@
 import os
+import tomllib
+from pathlib import Path
 
+import httpx
 from dotenv import load_dotenv
-from openai import OpenAI
+from openai import AuthenticationError, BadRequestError, OpenAI, OpenAIError, RateLimitError
+
+
+MAX_HISTORY_MESSAGES = 20
+DEFAULT_MODEL = "gpt-4o-mini"
 
 
 SYSTEM_PROMPT = """
 You are DataBot, a senior data science assistant with 10 years of hands-on
-experience in machine learning, data analysis, Python, and statistics.
+experience in machine learning, data analysis, Python, statistics, and prompt engineering.
 
 YOUR BEHAVIOUR:
 - Always think carefully and reason through the problem step by step before giving your final answer.
@@ -27,10 +34,11 @@ YOUR BEHAVIOUR:
 - Do not pretend to have seen a dataset, chart, or result unless it was provided.
 - Do not overcomplicate the answer when a simpler explanation is enough.
 - Maintain a professional, patient, and supportive tone at all times.
+- Always end your answer with a confidence score from 1 to 5, where 1 means very uncertain and 5 means very confident.
 
 SCOPE CONTROL:
-- Your main scope is data science, machine learning, statistics, Python for data work, data analysis, and related career or project guidance.
-- Only answer questions that are related to data science, data analytics, machine learning, artificial intelligence, statistics, Python, SQL, data engineering, data visualization, model evaluation, coding for data projects, GitHub, APIs, and command-line workflows used in data science.
+- Your main scope is data science, machine learning, statistics, Python for data work, data analysis, prompt engineering, and related career or project guidance.
+- Only answer questions that are related to data science, data analytics, machine learning, artificial intelligence, statistics, Python, SQL, data engineering, data visualization, model evaluation, prompt engineering, coding for data projects, GitHub, APIs, and command-line workflows used in data science.
 - You may answer basic greetings and questions about how to use DataBot.
 - If the user asks a question that is clearly outside this scope, do not answer the question directly. Instead, politely explain that you are DataBot, a specialist assistant for data science and machine learning. Then redirect the user by offering to help with a related data science topic.
 - Do not answer unrelated questions in detail, including general trivia, religion, politics, entertainment, medical, legal, or personal topics, unless the user clearly connects them to a data science task.
@@ -46,6 +54,7 @@ OUTPUT FORMAT:
   3. Step-by-step checks: Explain what the user should check, in order.
   4. Recommended fix: Provide a practical solution the user can apply.
   5. Prevention tip: Briefly explain how to avoid the issue in future.
+  Always use numbered steps for diagnosis answers. Do not write diagnosis answers as plain paragraphs only. Keep the five numbered diagnosis sections above, and use numbered sub-steps inside sections such as Likely Cause(s), Step-by-step checks, and Recommended fix when listing multiple items.
 
 - For explanations:
   Use the structure below:
@@ -154,22 +163,135 @@ After identifying missing values, decide whether to remove, replace, or investig
 """
 
 
-def main():
+def get_streamlit_secret(name, default=None):
+    secrets_path = Path(".streamlit") / "secrets.toml"
+    if not secrets_path.exists():
+        return default
+
+    with secrets_path.open("rb") as secrets_file:
+        return tomllib.load(secrets_file).get(name, default)
+
+
+def get_api_key():
     load_dotenv()
+    streamlit_api_key = get_streamlit_secret("OPENAI_API_KEY")
+    if streamlit_api_key and streamlit_api_key != "your_api_key_here":
+        return streamlit_api_key
 
     api_key = os.getenv("OPENAI_API_KEY")
+    if api_key and api_key != "your_api_key_here":
+        return api_key
+
+    return None
+
+
+def get_model():
+    load_dotenv()
+    streamlit_model = get_streamlit_secret("OPENAI_MODEL")
+    if streamlit_model:
+        return streamlit_model
+
+    model = os.getenv("OPENAI_MODEL")
+    if model:
+        return model
+
+    return DEFAULT_MODEL
+
+
+def create_client(api_key):
+    return OpenAI(
+        api_key=api_key,
+        http_client=httpx.Client(trust_env=False),
+        timeout=30,
+    )
+
+
+def create_conversation_history():
+    return [{"role": "system", "content": SYSTEM_PROMPT}]
+
+
+def ensure_system_prompt(conversation_history):
+    if not conversation_history:
+        return create_conversation_history()
+
+    if conversation_history[0].get("role") == "system":
+        return conversation_history
+
+    return create_conversation_history() + conversation_history
+
+
+def trim_conversation_history(conversation_history):
+    conversation_history = ensure_system_prompt(conversation_history)
+
+    if len(conversation_history) <= MAX_HISTORY_MESSAGES + 1:
+        return conversation_history
+
+    return [conversation_history[0]] + conversation_history[-MAX_HISTORY_MESSAGES:]
+
+
+def get_databot_reply(client, model, conversation_history, user_input):
+    user_input = user_input.strip()
+    if not user_input:
+        return "", conversation_history
+
+    updated_history = conversation_history + [{"role": "user", "content": user_input}]
+    updated_history = trim_conversation_history(updated_history)
+
+    response = client.chat.completions.create(
+        model=model,
+        messages=updated_history,
+    )
+    assistant_reply = response.choices[0].message.content or "I could not generate a response."
+
+    updated_history.append({"role": "assistant", "content": assistant_reply})
+    return assistant_reply, updated_history
+
+
+def format_openai_error(error):
+    if isinstance(error, AuthenticationError):
+        return "OpenAI rejected the API key. Check that OPENAI_API_KEY is correct and active, then try again."
+
+    if isinstance(error, BadRequestError) and getattr(error, "code", None) == "model_not_found":
+        return f"OpenAI could not access the selected model. Set OPENAI_MODEL to {DEFAULT_MODEL}, then try again."
+
+    if isinstance(error, RateLimitError):
+        if getattr(error, "code", None) == "insufficient_quota":
+            return "OpenAI says this API key has no available quota. Check billing, credits, and project limits in your OpenAI account, then try again."
+
+        return "OpenAI rate limit or billing limit reached. Check your OpenAI usage, billing, or project limits, then try again."
+
+    return f"Sorry, something went wrong while contacting DataBot: {error}"
+
+
+def ask_databot(user_question, chat_history=None):
+    if chat_history is None:
+        chat_history = create_conversation_history()
+
+    api_key = get_api_key()
+    if not api_key or api_key == "your_api_key_here":
+        return "Missing OPENAI_API_KEY. Add your API key, then try again."
+
+    client = create_client(api_key)
+    model = get_model()
+
+    try:
+        reply, _ = get_databot_reply(client, model, chat_history, user_question)
+        return reply or "Please enter a data science question."
+    except OpenAIError as error:
+        return format_openai_error(error)
+
+
+def main():
+    api_key = get_api_key()
     if not api_key or api_key == "your_api_key_here":
         print("Missing OPENAI_API_KEY. Add your API key to the local .env file, then run DataBot again.")
         return
 
-    client = OpenAI(api_key=api_key)
-    model = os.getenv("OPENAI_MODEL", "gpt-4o")
+    client = create_client(api_key)
+    model = get_model()
 
     # The conversation history list -- this is how memory works.
-    conversation_history = []
-
-    # Add the system prompt once at the start.
-    conversation_history.append({"role": "system", "content": SYSTEM_PROMPT})
+    conversation_history = create_conversation_history()
 
     print("DataBot ready. Type 'exit' or 'quit' to stop.")
 
@@ -182,22 +304,25 @@ def main():
         if user_input.lower() in {"exit", "quit"}:
             break
 
-        # Add the user's message to the conversation history.
-        conversation_history.append({"role": "user", "content": user_input})
+        if not user_input:
+            continue
 
         # Send the full conversation history to the model.
-        response = client.chat.completions.create(
-            model=model,
-            messages=conversation_history,
-        )
-
-        # Read the assistant's reply from the response.
-        assistant_reply = response.choices[0].message.content
+        try:
+            assistant_reply, conversation_history = get_databot_reply(
+                client,
+                model,
+                conversation_history,
+                user_input,
+            )
+        except OpenAIError as error:
+            print(f"DataBot error: {format_openai_error(error)}")
+            continue
+        except KeyboardInterrupt:
+            print("\nDataBot stopped.")
+            break
 
         print(f"DataBot: {assistant_reply}")
-
-        # Add the assistant's reply to the conversation history too.
-        conversation_history.append({"role": "assistant", "content": assistant_reply})
 
 
 if __name__ == "__main__":

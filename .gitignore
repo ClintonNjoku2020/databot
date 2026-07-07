@@ -1,1 +1,10 @@
 .env
+.streamlit/secrets.toml
+__pycache__/
+*.pyc
+.venv/
+.tmp/
+.pytest_cache/
+pytest-cache-files-*/
+streamlit.log
+streamlit.err.log
