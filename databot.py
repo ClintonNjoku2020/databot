@@ -164,12 +164,22 @@ After identifying missing values, decide whether to remove, replace, or investig
 
 
 def get_streamlit_secret(name, default=None):
+    try:
+        import streamlit as st
+
+        value = st.secrets.get(name)
+        if value is not None:
+            return str(value).strip()
+    except Exception:
+        pass
+
     secrets_path = Path(".streamlit") / "secrets.toml"
     if not secrets_path.exists():
         return default
 
     with secrets_path.open("rb") as secrets_file:
-        return tomllib.load(secrets_file).get(name, default)
+        value = tomllib.load(secrets_file).get(name, default)
+        return str(value).strip() if value is not None else default
 
 
 def get_api_key():
@@ -179,6 +189,7 @@ def get_api_key():
         return streamlit_api_key
 
     api_key = os.getenv("OPENAI_API_KEY")
+    api_key = api_key.strip() if api_key else None
     if api_key and api_key != "your_api_key_here":
         return api_key
 
@@ -192,6 +203,7 @@ def get_model():
         return streamlit_model
 
     model = os.getenv("OPENAI_MODEL")
+    model = model.strip() if model else None
     if model:
         return model
 
