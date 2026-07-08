@@ -4,7 +4,7 @@ DataBot is an AI assistant for data science, data analytics, machine learning, s
 
 ## Requirements
 
-- Python 3.10 or newer
+- Python 3.11 or newer
 - An OpenAI API key
 - Required Python libraries:
 
@@ -194,6 +194,41 @@ Expected behavior:
 - Diagnosis-style questions should use numbered sections.
 - Clearly out-of-scope questions should be redirected to a related data science topic.
 - Every answer should end with a confidence score from 1 to 5.
+
+## Deploying on Streamlit Community Cloud
+
+1. Make sure the latest code is pushed to GitHub.
+
+2. Go to:
+
+```text
+https://share.streamlit.io
+```
+
+3. Click `Create app`.
+
+4. Select:
+
+```text
+Repository: ClintonNjoku2020/databot
+Branch: main
+Main file path: app.py
+```
+
+5. Open `Advanced settings`.
+
+6. Set the Python version to `3.12` or any supported Python version newer than `3.11`.
+
+7. In the `Secrets` field, paste:
+
+```toml
+OPENAI_API_KEY = "your_real_api_key_here"
+OPENAI_MODEL = "gpt-4o-mini"
+```
+
+8. Click `Save`, then click `Deploy`.
+
+Do not commit `.streamlit/secrets.toml` or your real API key to GitHub. Streamlit Community Cloud stores deployment secrets separately from your repository.
 
 ## Troubleshooting
 
