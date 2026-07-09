@@ -220,8 +220,8 @@ def home():
                 <h1>Clinton Njoku</h1>
                 <p>I build practical data products that turn complex questions into clear, useful answers.</p>
                 <div class="hero-actions">
-                    <a class="hero-link primary" href="/DataBot" target="_self">Try DataBot</a>
-                    <a class="hero-link secondary" href="/Projects" target="_self">View projects</a>
+                    <a class="hero-link primary" href="/databot" target="_self">Try DataBot</a>
+                    <a class="hero-link secondary" href="/projects" target="_self">View projects</a>
                 </div>
             </div>
         </section>
@@ -262,7 +262,7 @@ def home():
             <div class="callout" style="margin-top:0">
                 <h2>Have a data problem?</h2>
                 <p>Explore the portfolio or start a conversation about a project, collaboration, or technical challenge.</p>
-                <a class="hero-link primary" href="/Contact" target="_self">Get in touch</a>
+                <a class="hero-link primary" href="/contact" target="_self">Get in touch</a>
             </div>
             """,
             unsafe_allow_html=True,
@@ -428,11 +428,11 @@ load_css()
 
 pages = {
     "Portfolio": [
-        st.Page(home, title="Home", icon=":material/home:", default=True),
-        st.Page(about, title="About Me", icon=":material/person:"),
-        st.Page(databot_page, title="DataBot", icon=":material/smart_toy:"),
-        st.Page(projects, title="Projects", icon=":material/work:"),
-        st.Page(contact, title="Contact", icon=":material/mail:"),
+        st.Page(home, title="Home", icon=":material/home:", url_path="", default=True),
+        st.Page(about, title="About Me", icon=":material/person:", url_path="about"),
+        st.Page(databot_page, title="DataBot", icon=":material/smart_toy:", url_path="databot"),
+        st.Page(projects, title="Projects", icon=":material/work:", url_path="projects"),
+        st.Page(contact, title="Contact", icon=":material/mail:", url_path="contact"),
     ]
 }
 
