@@ -311,6 +311,10 @@ def databot_page():
         "Meet DataBot.",
         "Ask focused questions about data analysis, machine learning, Python, statistics, SQL, model evaluation, or related technical workflows.",
     )
+    st.warning(
+        "Do not upload or paste confidential, personal, or sensitive data. "
+        "DataBot is for educational and data science support purposes."
+    )
 
     if "messages" not in st.session_state:
         st.session_state.messages = [
