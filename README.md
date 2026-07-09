@@ -2,6 +2,10 @@
 
 DataBot is an AI assistant for data science, data analytics, machine learning, statistics, Python, SQL, and related project workflows. It is presented inside a responsive Streamlit portfolio with Home, About Me, DataBot, Projects, and Contact pages. The repository also includes a command-line interface. DataBot uses the OpenAI API with a custom system prompt so it can give structured, beginner-friendly answers for explanations, debugging, model evaluation, and data project code.
 
+To control API costs, DataBot uses a compact system prompt and rolling conversation
+summaries. Recent messages remain unchanged, while older messages are periodically
+compressed into a short context summary.
+
 ## Requirements
 
 - Python 3.11 or newer
@@ -157,8 +161,8 @@ The system prompt defines DataBot's role, behavior, scope, and output format. It
 
 ## What I Would Improve
 
-- Add automated tests so changes to the prompt or command-line flow can be checked more safely.
 - Add conversation export so users can save useful answers from a terminal session.
+- Add token-usage reporting so deployment costs can be monitored in the interface.
 
 ## Testing DataBot Manually
 
