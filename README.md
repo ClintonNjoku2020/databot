@@ -1,6 +1,6 @@
 # DataBot
 
-DataBot is an AI assistant for data science, data analytics, machine learning, statistics, Python, SQL, and related project workflows. It includes a Streamlit web app and a command-line interface. It uses the OpenAI API with a custom system prompt so it can give structured, beginner-friendly answers for explanations, debugging, model evaluation, and data project code.
+DataBot is an AI assistant for data science, data analytics, machine learning, statistics, Python, SQL, and related project workflows. It is presented inside a responsive Streamlit portfolio with Home, About Me, DataBot, Projects, and Contact pages. The repository also includes a command-line interface. DataBot uses the OpenAI API with a custom system prompt so it can give structured, beginner-friendly answers for explanations, debugging, model evaluation, and data project code.
 
 ## Requirements
 
