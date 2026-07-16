@@ -196,25 +196,44 @@ def load_css():
 
         @media (max-width: 700px) {
             [data-testid="stAppViewBlockContainer"] {
-                padding: .6rem .9rem 4.5rem;
+                padding: .35rem .85rem 3.25rem;
+            }
+
+            [data-testid="stVerticalBlock"] {
+                gap: .45rem;
+            }
+
+            [data-testid="stHorizontalBlock"] {
+                gap: .65rem;
+            }
+
+            [data-testid="stElementContainer"] {
+                margin-bottom: .25rem;
+            }
+
+            [data-testid="stMarkdownContainer"] p {
+                margin-bottom: .55rem;
             }
 
             h1 {
-                font-size: clamp(2rem, 14vw, 3.15rem);
-                line-height: 1.06;
+                font-size: clamp(1.85rem, 11vw, 2.55rem);
+                line-height: 1.08;
+                margin-bottom: .45rem;
             }
 
             h2 {
-                font-size: 1.55rem;
+                font-size: 1.35rem;
                 line-height: 1.18;
+                margin-bottom: .45rem;
             }
 
             h3 {
                 line-height: 1.22;
+                margin-bottom: .35rem;
             }
 
             p {
-                line-height: 1.6;
+                line-height: 1.48;
             }
 
             [data-testid="stNavigation"] {
@@ -224,9 +243,9 @@ def load_css():
             .mobile-nav {
                 display: flex;
                 gap: .45rem;
-                margin: 0 0 .65rem;
+                margin: 0 0 .35rem;
                 overflow-x: auto;
-                padding: .15rem 0 .55rem;
+                padding: 0 0 .35rem;
                 scrollbar-width: none;
                 -webkit-overflow-scrolling: touch;
             }
@@ -244,13 +263,13 @@ def load_css():
                 font-size: .88rem;
                 font-weight: 700;
                 line-height: 1;
-                padding: .72rem .82rem;
+                padding: .62rem .72rem;
                 text-decoration: none !important;
             }
 
             .hero {
-                min-height: 390px;
-                padding: 1.15rem 1rem;
+                min-height: 310px;
+                padding: .9rem .85rem;
                 align-items: flex-end;
                 background-position: 62% center;
             }
@@ -264,45 +283,51 @@ def load_css():
             }
 
             .hero p {
-                font-size: 1rem;
-                line-height: 1.55;
+                font-size: .96rem;
+                line-height: 1.45;
             }
 
             .hero-actions {
                 display: grid;
                 grid-template-columns: 1fr;
-                gap: .65rem;
-                margin-top: .9rem;
+                gap: .45rem;
+                margin-top: .65rem;
             }
 
             .hero-link {
                 width: 100%;
                 text-align: center;
-                padding: .78rem .9rem;
+                padding: .65rem .8rem;
             }
 
             .section-intro {
-                margin: 1.45rem 0 .8rem;
+                margin: .9rem 0 .45rem;
+            }
+
+            .section-intro h1,
+            .section-intro h2 {
+                margin: .25rem 0 .4rem;
             }
 
             .section-intro p {
-                font-size: 1rem;
+                font-size: .96rem;
             }
 
             .metric-strip { grid-template-columns: 1fr; }
             .metric {
                 border-right: 0;
                 border-bottom: 1px solid var(--line);
-                padding: .8rem 0;
+                padding: .55rem 0;
             }
             .metric:last-child { border-bottom: 0; }
 
             .project {
-                padding: 1rem 0;
+                padding: .7rem 0;
             }
 
             .tags {
-                gap: .35rem;
+                gap: .3rem;
+                margin-top: .45rem;
             }
 
             .tag {
@@ -311,8 +336,16 @@ def load_css():
             }
 
             .callout {
-                padding: 1rem;
-                margin-top: 1.15rem;
+                padding: .85rem;
+                margin-top: .7rem;
+            }
+
+            .callout p {
+                margin-bottom: .6rem;
+            }
+
+            [data-testid="stAlert"] {
+                padding: .65rem .8rem;
             }
 
             [data-testid="stChatMessage"] {
@@ -333,17 +366,17 @@ def load_css():
 
         @media (max-width: 390px) {
             [data-testid="stAppViewBlockContainer"] {
-                padding-left: .75rem;
-                padding-right: .75rem;
+                padding-left: .65rem;
+                padding-right: .65rem;
             }
 
             .hero {
-                min-height: 360px;
-                padding: 1rem .85rem;
+                min-height: 290px;
+                padding: .8rem .75rem;
             }
 
             h1 {
-                font-size: 2rem;
+                font-size: 1.8rem;
             }
         }
         </style>
