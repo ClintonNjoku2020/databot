@@ -174,6 +174,10 @@ def load_css():
             margin: .7rem 0;
         }
 
+        .mobile-nav {
+            display: none;
+        }
+
         footer { visibility: hidden; }
 
         @media (max-width: 900px) {
@@ -211,11 +215,40 @@ def load_css():
             }
 
             [data-testid="stNavigation"] {
-                overflow-x: auto;
+                display: none;
             }
 
-            [data-testid="stNavigation"] nav {
-                min-width: max-content;
+            .mobile-nav {
+                display: flex;
+                gap: .45rem;
+                margin: .1rem 0 1rem;
+                overflow-x: auto;
+                padding: .15rem 0 .55rem;
+                scrollbar-width: none;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .mobile-nav::-webkit-scrollbar {
+                display: none;
+            }
+
+            .mobile-nav a {
+                flex: 0 0 auto;
+                background: var(--white);
+                border: 1px solid var(--line);
+                border-radius: 4px;
+                color: var(--ink) !important;
+                font-size: .88rem;
+                font-weight: 700;
+                line-height: 1;
+                padding: .72rem .82rem;
+                text-decoration: none !important;
+            }
+
+            .mobile-nav a.primary {
+                background: var(--green);
+                border-color: var(--green);
+                color: white !important;
             }
 
             .hero {
@@ -317,6 +350,21 @@ def load_css():
             }
         }
         </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def mobile_navigation():
+    st.markdown(
+        """
+        <nav class="mobile-nav" aria-label="Mobile navigation">
+            <a href="/" target="_self">Home</a>
+            <a href="/about" target="_self">About</a>
+            <a class="primary" href="/databot" target="_self">DataBot</a>
+            <a href="/projects" target="_self">Projects</a>
+            <a href="/contact" target="_self">Contact</a>
+        </nav>
         """,
         unsafe_allow_html=True,
     )
@@ -559,6 +607,7 @@ def contact():
 
 
 load_css()
+mobile_navigation()
 
 pages = {
     "Portfolio": [
