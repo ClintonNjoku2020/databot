@@ -234,21 +234,15 @@ def load_css():
 
             .mobile-nav a {
                 flex: 0 0 auto;
-                background: var(--white);
-                border: 1px solid var(--line);
+                background: var(--green);
+                border: 1px solid var(--green);
                 border-radius: 4px;
-                color: var(--ink) !important;
+                color: white !important;
                 font-size: .88rem;
                 font-weight: 700;
                 line-height: 1;
                 padding: .72rem .82rem;
                 text-decoration: none !important;
-            }
-
-            .mobile-nav a.primary {
-                background: var(--green);
-                border-color: var(--green);
-                color: white !important;
             }
 
             .hero {
