@@ -45,7 +45,7 @@ def load_css():
         header[data-testid="stHeader"] { background: rgba(247, 248, 245, .92); }
         [data-testid="stAppViewBlockContainer"] {
             max-width: 1180px;
-            padding-top: 1.75rem;
+            padding: 1.75rem 2rem 4rem;
             padding-bottom: 4rem;
         }
 
@@ -162,6 +162,11 @@ def load_css():
             padding: .25rem .65rem;
         }
 
+        [data-testid="stChatMessageContent"] {
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
         .contact-link {
             display: block;
             color: var(--green) !important;
@@ -171,20 +176,145 @@ def load_css():
 
         footer { visibility: hidden; }
 
+        @media (max-width: 900px) {
+            [data-testid="stAppViewBlockContainer"] {
+                padding-left: 1.25rem;
+                padding-right: 1.25rem;
+            }
+
+            .section-intro {
+                margin: 2.5rem 0 1.35rem;
+            }
+        }
+
         @media (max-width: 700px) {
-            [data-testid="stAppViewBlockContainer"] { padding-top: 1rem; }
+            [data-testid="stAppViewBlockContainer"] {
+                padding: .85rem 1rem 5.5rem;
+            }
+
+            h1 {
+                font-size: clamp(2rem, 14vw, 3.15rem);
+                line-height: 1.06;
+            }
+
+            h2 {
+                font-size: 1.55rem;
+                line-height: 1.18;
+            }
+
+            h3 {
+                line-height: 1.22;
+            }
+
+            p {
+                line-height: 1.6;
+            }
+
+            [data-testid="stNavigation"] {
+                overflow-x: auto;
+            }
+
+            [data-testid="stNavigation"] nav {
+                min-width: max-content;
+            }
+
             .hero {
-                min-height: 620px;
-                padding: 2rem 1.35rem;
+                min-height: 500px;
+                padding: 1.5rem 1.1rem;
                 align-items: flex-end;
                 background-position: 62% center;
             }
+
             .hero::before {
                 background: linear-gradient(0deg, rgba(10,20,16,.96) 0%, rgba(10,20,16,.72) 70%, rgba(10,20,16,.2) 100%);
             }
+
+            .hero h1 {
+                margin-bottom: .85rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+                line-height: 1.55;
+            }
+
+            .hero-actions {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: .65rem;
+                margin-top: 1.25rem;
+            }
+
+            .hero-link {
+                width: 100%;
+                text-align: center;
+                padding: .78rem .9rem;
+            }
+
+            .section-intro {
+                margin: 2.25rem 0 1.2rem;
+            }
+
+            .section-intro p {
+                font-size: 1rem;
+            }
+
             .metric-strip { grid-template-columns: 1fr; }
-            .metric { border-right: 0; border-bottom: 1px solid var(--line); }
+            .metric {
+                border-right: 0;
+                border-bottom: 1px solid var(--line);
+                padding: 1rem 0;
+            }
             .metric:last-child { border-bottom: 0; }
+
+            .project {
+                padding: 1.35rem 0;
+            }
+
+            .tags {
+                gap: .35rem;
+            }
+
+            .tag {
+                font-size: .74rem;
+                padding: .28rem .45rem;
+            }
+
+            .callout {
+                padding: 1.25rem;
+                margin-top: 1.75rem;
+            }
+
+            [data-testid="stChatMessage"] {
+                padding: .15rem .45rem;
+            }
+
+            [data-testid="stChatMessage"] p,
+            [data-testid="stMarkdownContainer"] li {
+                font-size: .96rem;
+            }
+
+            [data-testid="stChatInput"] {
+                left: .75rem;
+                right: .75rem;
+                width: auto;
+            }
+        }
+
+        @media (max-width: 390px) {
+            [data-testid="stAppViewBlockContainer"] {
+                padding-left: .75rem;
+                padding-right: .75rem;
+            }
+
+            .hero {
+                min-height: 460px;
+                padding: 1.25rem .9rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
         }
         </style>
         """,
