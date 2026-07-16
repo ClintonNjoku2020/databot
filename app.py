@@ -45,8 +45,7 @@ def load_css():
         header[data-testid="stHeader"] { background: rgba(247, 248, 245, .92); }
         [data-testid="stAppViewBlockContainer"] {
             max-width: 1180px;
-            padding: 1.75rem 2rem 4rem;
-            padding-bottom: 4rem;
+            padding: 1.15rem 2rem 2.5rem;
         }
 
         h1, h2, h3 {
@@ -67,10 +66,10 @@ def load_css():
         [data-testid="stNavigation"] span { font-weight: 600; }
 
         .hero {
-            min-height: min(680px, 78vh);
+            min-height: min(560px, 68vh);
             display: flex;
             align-items: center;
-            padding: clamp(2rem, 6vw, 5rem);
+            padding: clamp(1.6rem, 5vw, 3.5rem);
             border-radius: 6px;
             background-size: cover;
             background-position: center;
@@ -92,7 +91,7 @@ def load_css():
             color: white;
         }
 
-        .hero h1 { color: white; margin: .45rem 0 1.25rem; }
+        .hero h1 { color: white; margin: .35rem 0 .8rem; }
         .hero p { font-size: 1.12rem; max-width: 570px; color: #edf2ef; }
         .eyebrow {
             color: #d9b66f;
@@ -102,7 +101,7 @@ def load_css():
             text-transform: uppercase;
         }
 
-        .hero-actions { display: flex; gap: .75rem; margin-top: 1.75rem; flex-wrap: wrap; }
+        .hero-actions { display: flex; gap: .75rem; margin-top: 1.15rem; flex-wrap: wrap; }
         .hero-link {
             display: inline-block;
             padding: .72rem 1.05rem;
@@ -113,29 +112,33 @@ def load_css():
         .hero-link.primary { background: #f4b84e; color: #172019 !important; }
         .hero-link.secondary { border: 1px solid rgba(255,255,255,.65); color: white !important; }
 
-        .section-intro { max-width: 720px; margin: 3.5rem 0 2rem; }
+        .section-intro { max-width: 720px; margin: 2.25rem 0 1.25rem; }
+        .section-intro h1,
+        .section-intro h2 {
+            margin: .35rem 0 .65rem;
+        }
         .section-intro p { color: var(--muted); font-size: 1.06rem; }
 
         .metric-strip {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            margin-top: 1.5rem;
+            margin-top: 1rem;
             border-top: 1px solid var(--line);
             border-bottom: 1px solid var(--line);
         }
-        .metric { padding: 1.4rem; border-right: 1px solid var(--line); }
+        .metric { padding: 1rem 1.15rem; border-right: 1px solid var(--line); }
         .metric:last-child { border-right: 0; }
         .metric strong { display: block; font-family: "Manrope"; font-size: 1.1rem; }
         .metric span { color: var(--muted); font-size: .9rem; }
 
         .project {
             border-top: 1px solid var(--line);
-            padding: 2rem 0;
+            padding: 1.35rem 0;
         }
         .project-label { color: var(--green); font-weight: 700; font-size: .82rem; }
         .project h3 { margin: .45rem 0 .7rem; }
         .project p { color: var(--muted); max-width: 700px; }
-        .tags { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: .7rem; }
         .tag {
             background: #e8efeb;
             color: #294b3d;
@@ -148,9 +151,9 @@ def load_css():
         .callout {
             background: var(--green-dark);
             color: white;
-            padding: clamp(1.5rem, 4vw, 3rem);
+            padding: clamp(1.2rem, 3vw, 2rem);
             border-radius: 6px;
-            margin-top: 3rem;
+            margin-top: 2rem;
         }
         .callout h2 { color: white; margin-top: 0; }
         .callout p { color: #dceae4; max-width: 680px; }
@@ -187,13 +190,13 @@ def load_css():
             }
 
             .section-intro {
-                margin: 2.5rem 0 1.35rem;
+                margin: 1.8rem 0 1rem;
             }
         }
 
         @media (max-width: 700px) {
             [data-testid="stAppViewBlockContainer"] {
-                padding: .85rem 1rem 5.5rem;
+                padding: .6rem .9rem 4.5rem;
             }
 
             h1 {
@@ -221,7 +224,7 @@ def load_css():
             .mobile-nav {
                 display: flex;
                 gap: .45rem;
-                margin: .1rem 0 1rem;
+                margin: 0 0 .65rem;
                 overflow-x: auto;
                 padding: .15rem 0 .55rem;
                 scrollbar-width: none;
@@ -246,8 +249,8 @@ def load_css():
             }
 
             .hero {
-                min-height: 500px;
-                padding: 1.5rem 1.1rem;
+                min-height: 390px;
+                padding: 1.15rem 1rem;
                 align-items: flex-end;
                 background-position: 62% center;
             }
@@ -257,7 +260,7 @@ def load_css():
             }
 
             .hero h1 {
-                margin-bottom: .85rem;
+                margin-bottom: .55rem;
             }
 
             .hero p {
@@ -269,7 +272,7 @@ def load_css():
                 display: grid;
                 grid-template-columns: 1fr;
                 gap: .65rem;
-                margin-top: 1.25rem;
+                margin-top: .9rem;
             }
 
             .hero-link {
@@ -279,7 +282,7 @@ def load_css():
             }
 
             .section-intro {
-                margin: 2.25rem 0 1.2rem;
+                margin: 1.45rem 0 .8rem;
             }
 
             .section-intro p {
@@ -290,12 +293,12 @@ def load_css():
             .metric {
                 border-right: 0;
                 border-bottom: 1px solid var(--line);
-                padding: 1rem 0;
+                padding: .8rem 0;
             }
             .metric:last-child { border-bottom: 0; }
 
             .project {
-                padding: 1.35rem 0;
+                padding: 1rem 0;
             }
 
             .tags {
@@ -308,8 +311,8 @@ def load_css():
             }
 
             .callout {
-                padding: 1.25rem;
-                margin-top: 1.75rem;
+                padding: 1rem;
+                margin-top: 1.15rem;
             }
 
             [data-testid="stChatMessage"] {
@@ -335,8 +338,8 @@ def load_css():
             }
 
             .hero {
-                min-height: 460px;
-                padding: 1.25rem .9rem;
+                min-height: 360px;
+                padding: 1rem .85rem;
             }
 
             h1 {
@@ -415,7 +418,7 @@ def home():
         """,
         unsafe_allow_html=True,
     )
-    col1, col2 = st.columns([1.4, 1], gap="large")
+    col1, col2 = st.columns([1.4, 1], gap="medium")
     with col1:
         st.markdown(
             """
@@ -447,7 +450,7 @@ def about():
         "Data work grounded in clarity.",
         "I am Clinton Njoku, a data and AI practitioner focused on creating practical tools that help people understand information and make better decisions.",
     )
-    left, right = st.columns([1.35, 1], gap="large")
+    left, right = st.columns([1.35, 1], gap="medium")
     with left:
         st.subheader("How I work")
         st.write(
@@ -576,7 +579,7 @@ def contact():
         "Let’s discuss the work.",
         "For project enquiries, collaborations, or questions about DataBot, connect with me through GitHub.",
     )
-    details, next_step = st.columns([1, 1.35], gap="large")
+    details, next_step = st.columns([1, 1.35], gap="medium")
     with details:
         st.subheader("Connect")
         st.markdown(
