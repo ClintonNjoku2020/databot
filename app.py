@@ -183,41 +183,6 @@ def load_css():
             word-break: break-word;
         }
 
-        .upload-inline {
-            display: flex;
-            align-items: center;
-            gap: .75rem;
-            margin: .85rem 0 .4rem;
-        }
-
-        .upload-plus {
-            align-items: center;
-            background: var(--green);
-            border-radius: 999px;
-            color: white;
-            display: inline-flex;
-            font-size: 1.35rem;
-            font-weight: 700;
-            height: 2.35rem;
-            justify-content: center;
-            line-height: 1;
-            width: 2.35rem;
-        }
-
-        .upload-copy strong {
-            display: block;
-            font-weight: 800;
-        }
-
-        .upload-copy span {
-            color: var(--muted);
-            font-size: .9rem;
-        }
-
-        [data-testid="stFileUploader"] {
-            margin-top: .25rem;
-        }
-
         .contact-link {
             display: block;
             color: var(--green) !important;
@@ -594,12 +559,6 @@ def databot_page():
         ]
     if "conversation_history" not in st.session_state:
         st.session_state.conversation_history = databot.create_conversation_history()
-    if "uploaded_file_context" not in st.session_state:
-        st.session_state.uploaded_file_context = ""
-    if "uploaded_file_names" not in st.session_state:
-        st.session_state.uploaded_file_names = []
-    if "file_uploader_key" not in st.session_state:
-        st.session_state.file_uploader_key = 0
 
     toolbar_left, toolbar_right = st.columns([4, 1])
     with toolbar_left:
@@ -610,42 +569,6 @@ def databot_page():
                 {"role": "assistant", "content": "Chat cleared. What would you like to explore?"}
             ]
             st.session_state.conversation_history = databot.create_conversation_history()
-            st.session_state.uploaded_file_context = ""
-            st.session_state.uploaded_file_names = []
-            st.session_state.file_uploader_key += 1
-            st.rerun()
-
-    st.markdown(
-        """
-        <div class="upload-inline">
-            <div class="upload-plus" aria-hidden="true">+</div>
-            <div class="upload-copy">
-                <strong>Add files</strong>
-                <span>Upload a CSV or text-based file, then ask DataBot about it.</span>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    uploaded_files = st.file_uploader(
-        "+ Add files",
-        accept_multiple_files=True,
-        type=["csv", "txt", "md", "json", "py", "sql"],
-        key=f"databot_file_uploader_{st.session_state.file_uploader_key}",
-        help="CSV files are profiled automatically. Text-based files are summarized from a preview.",
-    )
-    if uploaded_files:
-        st.session_state.uploaded_file_names = [uploaded_file.name for uploaded_file in uploaded_files]
-        st.session_state.uploaded_file_context = databot.summarize_uploaded_files(uploaded_files)
-        st.success(f"Loaded file(s): {', '.join(st.session_state.uploaded_file_names)}")
-    elif st.session_state.uploaded_file_names:
-        st.info(f"Using uploaded file context: {', '.join(st.session_state.uploaded_file_names)}")
-
-    if st.session_state.uploaded_file_names:
-        if st.button("Clear uploaded files", use_container_width=False):
-            st.session_state.uploaded_file_context = ""
-            st.session_state.uploaded_file_names = []
-            st.session_state.file_uploader_key += 1
             st.rerun()
 
     for message in st.session_state.messages:
@@ -669,20 +592,16 @@ def databot_page():
             return
 
         chat_file_names = [uploaded_file.name for uploaded_file in chat_uploaded_files]
-        active_file_names = [*st.session_state.uploaded_file_names, *chat_file_names]
         display_input = user_text.strip() or "Uploaded file(s) for DataBot to inspect."
-        if active_file_names:
+        if chat_file_names:
             display_input = (
                 f"{display_input}\n\n"
-                f"File context: {', '.join(active_file_names)}"
+                f"File context: {', '.join(chat_file_names)}"
             )
 
-        active_file_context = st.session_state.uploaded_file_context
+        active_file_context = ""
         if chat_uploaded_files:
-            chat_file_context = databot.summarize_uploaded_files(chat_uploaded_files)
-            active_file_context = "\n\n---\n\n".join(
-                context for context in [active_file_context, chat_file_context] if context
-            )
+            active_file_context = databot.summarize_uploaded_files(chat_uploaded_files)
         model_input = databot.build_user_input_with_file_context(user_text, active_file_context)
 
         st.session_state.messages.append({"role": "user", "content": display_input})
