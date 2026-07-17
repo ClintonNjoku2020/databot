@@ -65,6 +65,19 @@ def load_css():
 
         [data-testid="stNavigation"] span { font-weight: 600; }
 
+        .home-hero-spacer {
+            display: block !important;
+            height: 3rem !important;
+            min-height: 3rem !important;
+            line-height: 0 !important;
+            font-size: 0 !important;
+            visibility: hidden;
+        }
+
+        [data-testid="stElementContainer"]:has(.hero) {
+            margin-top: 1.25rem !important;
+        }
+
         .hero {
             min-height: min(560px, 68vh);
             display: flex;
@@ -192,6 +205,15 @@ def load_css():
             .section-intro {
                 margin: 1.8rem 0 1rem;
             }
+
+            .home-hero-spacer {
+                height: 4.25rem !important;
+                min-height: 4.25rem !important;
+            }
+
+            [data-testid="stElementContainer"]:has(.hero) {
+                margin-top: 2rem !important;
+            }
         }
 
         @media (max-width: 700px) {
@@ -243,9 +265,9 @@ def load_css():
             .mobile-nav {
                 display: flex;
                 gap: .45rem;
-                margin: 0 0 .35rem;
+                margin: 0 0 2.25rem;
                 overflow-x: auto;
-                padding: 0 0 .35rem;
+                padding: 0 0 .45rem;
                 scrollbar-width: none;
                 -webkit-overflow-scrolling: touch;
             }
@@ -421,6 +443,10 @@ def page_heading(kicker, title, description):
 def home():
     hero_image = image_data_uri(ASSET_DIR / "data-workspace-hero.png")
     st.markdown(
+        '<div class="home-hero-spacer" aria-hidden="true" style="height: 56px; min-height: 56px;">&nbsp;</div>',
+        unsafe_allow_html=True,
+    )
+    st.markdown(
         f"""
         <section class="hero" style="background-image: url('{hero_image}')">
             <div class="hero-copy">
@@ -533,6 +559,12 @@ def databot_page():
         ]
     if "conversation_history" not in st.session_state:
         st.session_state.conversation_history = databot.create_conversation_history()
+    if "uploaded_file_context" not in st.session_state:
+        st.session_state.uploaded_file_context = ""
+    if "uploaded_file_names" not in st.session_state:
+        st.session_state.uploaded_file_names = []
+    if "file_uploader_key" not in st.session_state:
+        st.session_state.file_uploader_key = 0
 
     toolbar_left, toolbar_right = st.columns([4, 1])
     with toolbar_left:
@@ -543,17 +575,60 @@ def databot_page():
                 {"role": "assistant", "content": "Chat cleared. What would you like to explore?"}
             ]
             st.session_state.conversation_history = databot.create_conversation_history()
+            st.session_state.uploaded_file_context = ""
+            st.session_state.uploaded_file_names = []
+            st.session_state.file_uploader_key += 1
             st.rerun()
+
+    with st.container(border=True):
+        st.subheader("Upload data")
+        st.caption("Add a CSV or text-based file here, then ask DataBot questions about it in the chat.")
+        uploaded_files = st.file_uploader(
+            "Choose file(s)",
+            accept_multiple_files=True,
+            type=["csv", "txt", "md", "json", "py", "sql"],
+            key=f"databot_file_uploader_{st.session_state.file_uploader_key}",
+            help="CSV files are profiled automatically. Text-based files are summarized from a preview.",
+        )
+        if uploaded_files:
+            st.session_state.uploaded_file_names = [uploaded_file.name for uploaded_file in uploaded_files]
+            st.session_state.uploaded_file_context = databot.summarize_uploaded_files(uploaded_files)
+            st.success(f"Loaded file(s): {', '.join(st.session_state.uploaded_file_names)}")
+        elif st.session_state.uploaded_file_names:
+            st.info(f"Using uploaded file context: {', '.join(st.session_state.uploaded_file_names)}")
+
+        if st.session_state.uploaded_file_names:
+            if st.button("Clear uploaded files", use_container_width=False):
+                st.session_state.uploaded_file_context = ""
+                st.session_state.uploaded_file_names = []
+                st.session_state.file_uploader_key += 1
+                st.rerun()
 
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.write(message["content"])
 
-    user_input = st.chat_input("Ask a data science question...")
-    if user_input:
-        st.session_state.messages.append({"role": "user", "content": user_input})
+    prompt = st.chat_input("Ask a question about your data or a data science topic...")
+    if prompt:
+        user_text = prompt
+
+        if not user_text.strip():
+            return
+
+        active_file_names = st.session_state.uploaded_file_names
+        display_input = user_text.strip() or "Uploaded file(s) for DataBot to inspect."
+        if active_file_names:
+            display_input = (
+                f"{display_input}\n\n"
+                f"File context: {', '.join(active_file_names)}"
+            )
+
+        active_file_context = st.session_state.uploaded_file_context
+        model_input = databot.build_user_input_with_file_context(user_text, active_file_context)
+
+        st.session_state.messages.append({"role": "user", "content": display_input})
         with st.chat_message("user"):
-            st.write(user_input)
+            st.write(display_input)
 
         with st.chat_message("assistant"):
             with st.spinner("Working on your question..."):
@@ -566,7 +641,7 @@ def databot_page():
                             client=databot.create_client(api_key),
                             model=databot.get_model(),
                             conversation_history=st.session_state.conversation_history,
-                            user_input=user_input,
+                            user_input=model_input,
                         )
                     except OpenAIError as error:
                         answer = databot.format_openai_error(error)

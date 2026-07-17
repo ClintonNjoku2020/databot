@@ -1,3 +1,5 @@
+import csv
+import io
 import os
 import tomllib
 from pathlib import Path
@@ -11,6 +13,9 @@ DEFAULT_MODEL = "gpt-4o-mini"
 RECENT_MESSAGES_TO_KEEP = 8
 SUMMARIZE_AFTER_MESSAGES = 16
 SUMMARY_PREFIX = "Conversation summary:\n"
+MAX_FILE_PREVIEW_CHARS = 12000
+MAX_CSV_ROWS_TO_ANALYZE = 500
+MAX_CSV_SAMPLE_ROWS = 12
 
 
 SYSTEM_PROMPT = """
@@ -97,6 +102,156 @@ def create_client(api_key):
 
 def create_conversation_history():
     return [{"role": "system", "content": SYSTEM_PROMPT}]
+
+
+def _decode_file_bytes(file_bytes):
+    for encoding in ("utf-8-sig", "utf-8", "latin-1"):
+        try:
+            return file_bytes.decode(encoding), encoding
+        except UnicodeDecodeError:
+            continue
+
+    return None, None
+
+
+def _format_size(size):
+    if size is None:
+        return "unknown size"
+    if size < 1024:
+        return f"{size} bytes"
+    if size < 1024 * 1024:
+        return f"{size / 1024:.1f} KB"
+    return f"{size / (1024 * 1024):.1f} MB"
+
+
+def _csv_summary(name, file_bytes, mime_type=None):
+    text, encoding = _decode_file_bytes(file_bytes)
+    if text is None:
+        return (
+            f"File: {name}\n"
+            f"Type: {mime_type or 'CSV'}\n"
+            "Status: Could not decode this CSV as text."
+        )
+
+    reader = csv.DictReader(io.StringIO(text))
+    columns = reader.fieldnames or []
+    rows = []
+    for index, row in enumerate(reader):
+        if index >= MAX_CSV_ROWS_TO_ANALYZE:
+            break
+        rows.append(row)
+
+    total_rows = text.count("\n")
+    if columns:
+        total_rows = max(0, total_rows - 1)
+
+    lines = [
+        f"File: {name}",
+        f"Type: CSV dataset ({mime_type or 'text/csv'}, decoded as {encoding})",
+        f"Size: {_format_size(len(file_bytes))}",
+        f"Columns ({len(columns)}): {', '.join(columns) if columns else 'None detected'}",
+        f"Estimated rows: {total_rows}",
+    ]
+
+    if rows:
+        lines.append(f"Analyzed first {len(rows)} rows for quick profiling.")
+        profile_lines = []
+        for column in columns[:20]:
+            values = [str(row.get(column, "")).strip() for row in rows]
+            missing = sum(1 for value in values if value == "")
+            numeric_values = []
+            for value in values:
+                if value == "":
+                    continue
+                try:
+                    numeric_values.append(float(value.replace(",", "")))
+                except ValueError:
+                    pass
+
+            if numeric_values and len(numeric_values) >= max(2, len(values) - missing - 1):
+                mean = sum(numeric_values) / len(numeric_values)
+                profile_lines.append(
+                    f"- {column}: numeric, missing {missing}, min {min(numeric_values):.3g}, "
+                    f"max {max(numeric_values):.3g}, mean {mean:.3g}"
+                )
+            else:
+                unique_preview = []
+                for value in values:
+                    if value and value not in unique_preview:
+                        unique_preview.append(value)
+                    if len(unique_preview) == 4:
+                        break
+                examples = ", ".join(unique_preview) if unique_preview else "no non-empty examples"
+                profile_lines.append(f"- {column}: text/category, missing {missing}, examples: {examples}")
+
+        if profile_lines:
+            lines.append("Column profile:")
+            lines.extend(profile_lines)
+
+        sample_rows = rows[:MAX_CSV_SAMPLE_ROWS]
+        sample_output = io.StringIO()
+        writer = csv.DictWriter(sample_output, fieldnames=columns)
+        writer.writeheader()
+        writer.writerows(sample_rows)
+        lines.append(f"Sample rows:\n{sample_output.getvalue().strip()}")
+
+    return "\n".join(lines)
+
+
+def summarize_uploaded_file(uploaded_file):
+    name = getattr(uploaded_file, "name", "uploaded file")
+    mime_type = getattr(uploaded_file, "type", None)
+    if hasattr(uploaded_file, "getvalue"):
+        file_bytes = uploaded_file.getvalue()
+    else:
+        file_bytes = uploaded_file.read()
+
+    suffix = Path(name).suffix.lower()
+    if suffix == ".csv" or mime_type == "text/csv":
+        return _csv_summary(name, file_bytes, mime_type)
+
+    text, encoding = _decode_file_bytes(file_bytes)
+    if text is None:
+        return (
+            f"File: {name}\n"
+            f"Type: {mime_type or 'unknown'}\n"
+            f"Size: {_format_size(len(file_bytes))}\n"
+            "Status: Binary or unsupported file. DataBot can see the file metadata, but not its contents."
+        )
+
+    preview = text[:MAX_FILE_PREVIEW_CHARS]
+    truncated = len(text) > MAX_FILE_PREVIEW_CHARS
+    return (
+        f"File: {name}\n"
+        f"Type: {mime_type or 'text-like file'}, decoded as {encoding}\n"
+        f"Size: {_format_size(len(file_bytes))}\n"
+        f"Content preview{' (truncated)' if truncated else ''}:\n{preview}"
+    )
+
+
+def summarize_uploaded_files(uploaded_files):
+    return "\n\n---\n\n".join(summarize_uploaded_file(uploaded_file) for uploaded_file in uploaded_files)
+
+
+def build_user_input_with_file_context(user_text, file_context):
+    user_text = (user_text or "").strip()
+    file_context = (file_context or "").strip()
+
+    if not file_context:
+        return user_text
+
+    question = user_text or "Please inspect the uploaded file(s) and summarize the key information."
+    return (
+        f"{question}\n\n"
+        "Uploaded file context follows. Use only this extracted file context when answering questions "
+        "about the upload. If the context is only a preview or sample, say so and avoid claiming exact "
+        "full-dataset results.\n\n"
+        f"{file_context}"
+    )
+
+
+def build_user_input_with_files(user_text, uploaded_files):
+    return build_user_input_with_file_context(user_text, summarize_uploaded_files(uploaded_files))
 
 
 def ensure_system_prompt(conversation_history):

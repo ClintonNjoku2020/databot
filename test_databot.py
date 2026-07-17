@@ -96,3 +96,43 @@ def test_summary_failure_uses_local_fallback():
     assert len(completions.calls) == 2
     assert history[1]["content"].startswith(databot.SUMMARY_PREFIX)
     assert "message" in history[1]["content"]
+
+
+def test_uploaded_csv_is_summarized_with_columns_and_sample_rows():
+    uploaded_file = SimpleNamespace(
+        name="sales.csv",
+        type="text/csv",
+        getvalue=lambda: b"region,sales\nNorth,10\nSouth,20\n",
+    )
+
+    summary = databot.summarize_uploaded_file(uploaded_file)
+
+    assert "File: sales.csv" in summary
+    assert "Columns (2): region, sales" in summary
+    assert "sales: numeric" in summary
+    assert "North,10" in summary
+
+
+def test_user_input_with_files_includes_upload_context():
+    uploaded_file = SimpleNamespace(
+        name="notes.txt",
+        type="text/plain",
+        getvalue=lambda: b"Check missing values before modelling.",
+    )
+
+    prompt = databot.build_user_input_with_files("What should I do next?", [uploaded_file])
+
+    assert "What should I do next?" in prompt
+    assert "Uploaded file context follows" in prompt
+    assert "Check missing values before modelling." in prompt
+
+
+def test_user_input_with_saved_file_context_reuses_existing_upload():
+    prompt = databot.build_user_input_with_file_context(
+        "Which columns are numeric?",
+        "File: sales.csv\nColumns (2): region, sales",
+    )
+
+    assert "Which columns are numeric?" in prompt
+    assert "Uploaded file context follows" in prompt
+    assert "File: sales.csv" in prompt
