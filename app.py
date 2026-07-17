@@ -652,14 +652,24 @@ def databot_page():
         with st.chat_message(message["role"]):
             st.write(message["content"])
 
-    prompt = st.chat_input("Ask a question about your data or a data science topic...")
+    prompt = st.chat_input(
+        "Ask a question about your data or a data science topic...",
+        accept_file="multiple",
+        file_type=["csv", "txt", "md", "json", "py", "sql"],
+    )
     if prompt:
-        user_text = prompt
+        if isinstance(prompt, str):
+            user_text = prompt
+            chat_uploaded_files = []
+        else:
+            user_text = prompt.text or ""
+            chat_uploaded_files = prompt.files or []
 
-        if not user_text.strip():
+        if not user_text.strip() and not chat_uploaded_files:
             return
 
-        active_file_names = st.session_state.uploaded_file_names
+        chat_file_names = [uploaded_file.name for uploaded_file in chat_uploaded_files]
+        active_file_names = [*st.session_state.uploaded_file_names, *chat_file_names]
         display_input = user_text.strip() or "Uploaded file(s) for DataBot to inspect."
         if active_file_names:
             display_input = (
@@ -668,6 +678,11 @@ def databot_page():
             )
 
         active_file_context = st.session_state.uploaded_file_context
+        if chat_uploaded_files:
+            chat_file_context = databot.summarize_uploaded_files(chat_uploaded_files)
+            active_file_context = "\n\n---\n\n".join(
+                context for context in [active_file_context, chat_file_context] if context
+            )
         model_input = databot.build_user_input_with_file_context(user_text, active_file_context)
 
         st.session_state.messages.append({"role": "user", "content": display_input})
