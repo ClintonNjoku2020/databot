@@ -183,6 +183,41 @@ def load_css():
             word-break: break-word;
         }
 
+        .upload-inline {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            margin: .85rem 0 .4rem;
+        }
+
+        .upload-plus {
+            align-items: center;
+            background: var(--green);
+            border-radius: 999px;
+            color: white;
+            display: inline-flex;
+            font-size: 1.35rem;
+            font-weight: 700;
+            height: 2.35rem;
+            justify-content: center;
+            line-height: 1;
+            width: 2.35rem;
+        }
+
+        .upload-copy strong {
+            display: block;
+            font-weight: 800;
+        }
+
+        .upload-copy span {
+            color: var(--muted);
+            font-size: .9rem;
+        }
+
+        [data-testid="stFileUploader"] {
+            margin-top: .25rem;
+        }
+
         .contact-link {
             display: block;
             color: var(--green) !important;
@@ -580,29 +615,38 @@ def databot_page():
             st.session_state.file_uploader_key += 1
             st.rerun()
 
-    with st.container(border=True):
-        st.subheader("Upload data")
-        st.caption("Add a CSV or text-based file here, then ask DataBot questions about it in the chat.")
-        uploaded_files = st.file_uploader(
-            "Choose file(s)",
-            accept_multiple_files=True,
-            type=["csv", "txt", "md", "json", "py", "sql"],
-            key=f"databot_file_uploader_{st.session_state.file_uploader_key}",
-            help="CSV files are profiled automatically. Text-based files are summarized from a preview.",
-        )
-        if uploaded_files:
-            st.session_state.uploaded_file_names = [uploaded_file.name for uploaded_file in uploaded_files]
-            st.session_state.uploaded_file_context = databot.summarize_uploaded_files(uploaded_files)
-            st.success(f"Loaded file(s): {', '.join(st.session_state.uploaded_file_names)}")
-        elif st.session_state.uploaded_file_names:
-            st.info(f"Using uploaded file context: {', '.join(st.session_state.uploaded_file_names)}")
+    st.markdown(
+        """
+        <div class="upload-inline">
+            <div class="upload-plus" aria-hidden="true">+</div>
+            <div class="upload-copy">
+                <strong>Add files</strong>
+                <span>Upload a CSV or text-based file, then ask DataBot about it.</span>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    uploaded_files = st.file_uploader(
+        "+ Add files",
+        accept_multiple_files=True,
+        type=["csv", "txt", "md", "json", "py", "sql"],
+        key=f"databot_file_uploader_{st.session_state.file_uploader_key}",
+        help="CSV files are profiled automatically. Text-based files are summarized from a preview.",
+    )
+    if uploaded_files:
+        st.session_state.uploaded_file_names = [uploaded_file.name for uploaded_file in uploaded_files]
+        st.session_state.uploaded_file_context = databot.summarize_uploaded_files(uploaded_files)
+        st.success(f"Loaded file(s): {', '.join(st.session_state.uploaded_file_names)}")
+    elif st.session_state.uploaded_file_names:
+        st.info(f"Using uploaded file context: {', '.join(st.session_state.uploaded_file_names)}")
 
-        if st.session_state.uploaded_file_names:
-            if st.button("Clear uploaded files", use_container_width=False):
-                st.session_state.uploaded_file_context = ""
-                st.session_state.uploaded_file_names = []
-                st.session_state.file_uploader_key += 1
-                st.rerun()
+    if st.session_state.uploaded_file_names:
+        if st.button("Clear uploaded files", use_container_width=False):
+            st.session_state.uploaded_file_context = ""
+            st.session_state.uploaded_file_names = []
+            st.session_state.file_uploader_key += 1
+            st.rerun()
 
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
