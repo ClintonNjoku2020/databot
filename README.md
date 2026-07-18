@@ -6,6 +6,26 @@ To control API costs, DataBot uses a compact system prompt and rolling conversat
 summaries. Recent messages remain unchanged, while older messages are periodically
 compressed into a short context summary.
 
+## Live Deployment
+
+The portfolio and DataBot are deployed at:
+
+```text
+https://clintonnjoku.com
+https://clintonnjoku.com/databot
+```
+
+The same app is also available through Streamlit Community Cloud:
+
+```text
+https://clinton-data-ai-portfolio.streamlit.app
+https://clinton-data-ai-portfolio.streamlit.app/databot
+```
+
+The custom domain is served from an Ubuntu VPS. The Streamlit app runs locally on the server at `127.0.0.1:8501`, and the public domain forwards web traffic to that local Streamlit process through the server's web/proxy configuration.
+
+DataBot supports file uploads directly in the chat input. Users can attach CSV and text-based files, then ask questions about the uploaded data.
+
 ## Requirements
 
 - Python 3.11 or newer
@@ -234,6 +254,57 @@ OPENAI_MODEL = "gpt-4o-mini"
 
 Do not commit `.streamlit/secrets.toml` or your real API key to GitHub. Streamlit Community Cloud stores deployment secrets separately from your repository.
 
+## Current VPS Deployment
+
+The custom domain deployment uses an Ubuntu VPS with the repository checked out at:
+
+```bash
+/root/databot
+```
+
+The app runs inside the project virtual environment:
+
+```bash
+/root/databot/.venv
+```
+
+The Streamlit process is started with:
+
+```bash
+/root/databot/.venv/bin/python -m streamlit run app.py --server.address 127.0.0.1 --server.port 8501
+```
+
+The app is bound to `127.0.0.1` so it is not exposed directly on the public internet. The public site at `https://clintonnjoku.com` reaches the app through the VPS web/proxy layer, which forwards requests to `127.0.0.1:8501`.
+
+To update the VPS deployment after pushing changes to GitHub:
+
+```bash
+cd /root/databot
+git pull
+/root/databot/.venv/bin/pip install -r requirements.txt
+kill $(pgrep -f "streamlit run app.py")
+nohup /root/databot/.venv/bin/python -m streamlit run app.py --server.address 127.0.0.1 --server.port 8501 > /root/databot/streamlit.log 2> /root/databot/streamlit.err.log &
+```
+
+To confirm the Streamlit process is running:
+
+```bash
+ps aux | grep streamlit
+```
+
+Expected process:
+
+```text
+/root/databot/.venv/bin/python -m streamlit run app.py --server.address 127.0.0.1 --server.port 8501
+```
+
+Logs are written to:
+
+```text
+/root/databot/streamlit.log
+/root/databot/streamlit.err.log
+```
+
 ## Troubleshooting
 
 - If you see `Missing OPENAI_API_KEY`, check that `.env` exists and contains your real API key.
@@ -241,6 +312,7 @@ Do not commit `.streamlit/secrets.toml` or your real API key to GitHub. Streamli
 - If OpenAI says the key has no available quota, check billing, credits, and project limits in your OpenAI Platform account.
 - If you see an API error, check your API key, model name, internet connection, billing status, and rate limits.
 - If the model name does not work for your account, update `OPENAI_MODEL` in `.env` and `.env.example`.
+- If `clintonnjoku.com` does not show the latest GitHub changes but the `.streamlit.app` URL does, SSH into the VPS, run `git pull` in `/root/databot`, and restart the local Streamlit process.
 
 ## Notes
 
