@@ -5,6 +5,7 @@ from pathlib import Path
 import streamlit as st
 from openai import OpenAIError
 
+import artifact_generator
 import databot
 
 
@@ -543,12 +544,14 @@ def databot_page():
     page_heading(
         "AI assistant",
         "Meet DataBot.",
-        "Ask focused questions about data analysis, machine learning, Python, statistics, SQL, model evaluation, or related technical workflows.",
+        "Ask focused questions or generate professional PDFs, charts, diagrams, and PowerPoint presentations from a brief or dataset.",
     )
     st.warning(
         "Do not upload or paste confidential, personal, or sensitive data. "
         "DataBot is for educational and data science support purposes."
     )
+
+    chat_tab, artifact_tab = st.tabs(["Chat", "Create files"])
 
     if "messages" not in st.session_state:
         st.session_state.messages = [
@@ -560,71 +563,162 @@ def databot_page():
     if "conversation_history" not in st.session_state:
         st.session_state.conversation_history = databot.create_conversation_history()
 
-    toolbar_left, toolbar_right = st.columns([4, 1])
-    with toolbar_left:
-        st.caption("DataBot may make mistakes. Verify important technical decisions.")
-    with toolbar_right:
-        if st.button("Clear chat", icon=":material/delete_sweep:", use_container_width=True):
-            st.session_state.messages = [
-                {"role": "assistant", "content": "Chat cleared. What would you like to explore?"}
-            ]
-            st.session_state.conversation_history = databot.create_conversation_history()
-            st.rerun()
+    with chat_tab:
+        toolbar_left, toolbar_right = st.columns([4, 1])
+        with toolbar_left:
+            st.caption("DataBot may make mistakes. Verify important technical decisions.")
+        with toolbar_right:
+            if st.button("Clear chat", icon=":material/delete_sweep:", use_container_width=True):
+                st.session_state.messages = [
+                    {"role": "assistant", "content": "Chat cleared. What would you like to explore?"}
+                ]
+                st.session_state.conversation_history = databot.create_conversation_history()
+                st.rerun()
 
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.write(message["content"])
+        for message in st.session_state.messages:
+            with st.chat_message(message["role"]):
+                st.write(message["content"])
 
-    prompt = st.chat_input(
-        "Ask a question about your data or a data science topic...",
-        accept_file="multiple",
-        file_type=["csv", "txt", "md", "json", "py", "sql"],
-    )
-    if prompt:
-        if isinstance(prompt, str):
-            user_text = prompt
-            chat_uploaded_files = []
-        else:
-            user_text = prompt.text or ""
-            chat_uploaded_files = prompt.files or []
+        prompt = st.chat_input(
+            "Ask a question about your data or a data science topic...",
+            accept_file="multiple",
+            file_type=["csv", "txt", "md", "json", "py", "sql"],
+        )
+        if prompt:
+            if isinstance(prompt, str):
+                user_text = prompt
+                chat_uploaded_files = []
+            else:
+                user_text = prompt.text or ""
+                chat_uploaded_files = prompt.files or []
 
-        if not user_text.strip() and not chat_uploaded_files:
-            return
+            if not user_text.strip() and not chat_uploaded_files:
+                return
 
-        chat_file_names = [uploaded_file.name for uploaded_file in chat_uploaded_files]
-        display_input = user_text.strip() or "Uploaded file(s) for DataBot to inspect."
-        if chat_file_names:
-            display_input = (
-                f"{display_input}\n\n"
-                f"File context: {', '.join(chat_file_names)}"
+            chat_file_names = [uploaded_file.name for uploaded_file in chat_uploaded_files]
+            display_input = user_text.strip() or "Uploaded file(s) for DataBot to inspect."
+            if chat_file_names:
+                display_input = (
+                    f"{display_input}\n\n"
+                    f"File context: {', '.join(chat_file_names)}"
+                )
+
+            active_file_context = ""
+            if chat_uploaded_files:
+                active_file_context = databot.summarize_uploaded_files(chat_uploaded_files)
+            model_input = databot.build_user_input_with_file_context(user_text, active_file_context)
+
+            st.session_state.messages.append({"role": "user", "content": display_input})
+            with st.chat_message("user"):
+                st.write(display_input)
+
+            with st.chat_message("assistant"):
+                with st.spinner("Working on your question..."):
+                    api_key = databot.get_api_key()
+                    if not api_key:
+                        answer = "DataBot is not configured yet. Add OPENAI_API_KEY to the app secrets."
+                    else:
+                        try:
+                            answer, st.session_state.conversation_history = databot.get_databot_reply(
+                                client=databot.create_client(api_key),
+                                model=databot.get_model(),
+                                conversation_history=st.session_state.conversation_history,
+                                user_input=model_input,
+                            )
+                        except OpenAIError as error:
+                            answer = databot.format_openai_error(error)
+                    st.write(answer)
+            st.session_state.messages.append({"role": "assistant", "content": answer})
+
+    with artifact_tab:
+        st.caption("Create downloadable files locally from your brief. CSV uploads are used to populate chart values.")
+        with st.form("artifact_form"):
+            artifact_title = st.text_input("Title", value="Data Analysis Summary")
+            artifact_brief = st.text_area(
+                "Brief",
+                value="Summarize the analysis, highlight the key findings, and recommend next steps.",
+                height=95,
             )
+            artifact_points = st.text_area(
+                "Key points",
+                value=(
+                    "Clean and profile the dataset\n"
+                    "Identify the strongest patterns\n"
+                    "Explain business impact\n"
+                    "Recommend measurable next steps"
+                ),
+                height=130,
+            )
+            artifact_csv = st.file_uploader(
+                "Optional CSV for chart data",
+                type=["csv"],
+                help="DataBot will infer the first usable numeric column for the chart.",
+            )
+            submitted = st.form_submit_button("Generate files", icon=":material/description:")
 
-        active_file_context = ""
-        if chat_uploaded_files:
-            active_file_context = databot.summarize_uploaded_files(chat_uploaded_files)
-        model_input = databot.build_user_input_with_file_context(user_text, active_file_context)
+        if submitted:
+            csv_bytes = artifact_csv.getvalue() if artifact_csv else None
+            st.session_state.generated_artifacts = artifact_generator.generate_artifacts(
+                artifact_title,
+                artifact_brief,
+                artifact_points,
+                csv_bytes,
+            )
+            st.session_state.generated_artifact_title = artifact_title
 
-        st.session_state.messages.append({"role": "user", "content": display_input})
-        with st.chat_message("user"):
-            st.write(display_input)
+        if "generated_artifacts" in st.session_state:
+            artifacts = st.session_state.generated_artifacts
+            title = st.session_state.get("generated_artifact_title", "DataBot artifact")
+            st.success("Files are ready.")
+            preview_left, preview_right = st.columns(2, gap="medium")
+            with preview_left:
+                st.subheader("Chart")
+                st.image(artifacts["chart_svg"].decode("utf-8"))
+            with preview_right:
+                st.subheader("Diagram")
+                st.image(artifacts["diagram_svg"].decode("utf-8"))
 
-        with st.chat_message("assistant"):
-            with st.spinner("Working on your question..."):
-                api_key = databot.get_api_key()
-                if not api_key:
-                    answer = "DataBot is not configured yet. Add OPENAI_API_KEY to the app secrets."
-                else:
-                    try:
-                        answer, st.session_state.conversation_history = databot.get_databot_reply(
-                            client=databot.create_client(api_key),
-                            model=databot.get_model(),
-                            conversation_history=st.session_state.conversation_history,
-                            user_input=model_input,
-                        )
-                    except OpenAIError as error:
-                        answer = databot.format_openai_error(error)
-                st.write(answer)
-        st.session_state.messages.append({"role": "assistant", "content": answer})
+            pdf_name = artifact_generator.safe_filename(title, "pdf")
+            chart_name = artifact_generator.safe_filename(title + " chart", "svg")
+            diagram_name = artifact_generator.safe_filename(title + " diagram", "svg")
+            pptx_name = artifact_generator.safe_filename(title, "pptx")
+            download_cols = st.columns(4)
+            with download_cols[0]:
+                st.download_button(
+                    "PDF",
+                    artifacts["pdf"],
+                    file_name=pdf_name,
+                    mime="application/pdf",
+                    icon=":material/picture_as_pdf:",
+                    use_container_width=True,
+                )
+            with download_cols[1]:
+                st.download_button(
+                    "Chart",
+                    artifacts["chart_svg"],
+                    file_name=chart_name,
+                    mime="image/svg+xml",
+                    icon=":material/bar_chart:",
+                    use_container_width=True,
+                )
+            with download_cols[2]:
+                st.download_button(
+                    "Diagram",
+                    artifacts["diagram_svg"],
+                    file_name=diagram_name,
+                    mime="image/svg+xml",
+                    icon=":material/account_tree:",
+                    use_container_width=True,
+                )
+            with download_cols[3]:
+                st.download_button(
+                    "PowerPoint",
+                    artifacts["pptx"],
+                    file_name=pptx_name,
+                    mime="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                    icon=":material/slideshow:",
+                    use_container_width=True,
+                )
 
 
 def projects():

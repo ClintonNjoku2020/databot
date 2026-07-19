@@ -1,6 +1,6 @@
 # DataBot
 
-DataBot is an AI assistant for data science, data analytics, machine learning, statistics, Python, SQL, and related project workflows. It is presented inside a responsive Streamlit portfolio with Home, About Me, DataBot, Projects, and Contact pages. The repository also includes a command-line interface. DataBot uses the OpenAI API with a custom system prompt so it can give structured, beginner-friendly answers for explanations, debugging, model evaluation, and data project code.
+DataBot is an AI assistant for data science, data analytics, machine learning, statistics, Python, SQL, and related project workflows. It is presented inside a responsive Streamlit portfolio with Home, About Me, DataBot, Projects, and Contact pages. The repository also includes a command-line interface. DataBot uses the OpenAI API with a custom system prompt so it can give structured, beginner-friendly answers for explanations, debugging, model evaluation, and data project code. In the Streamlit app, users can also generate downloadable PDFs, charts, workflow diagrams, and PowerPoint presentations from a brief or CSV-backed dataset.
 
 To control API costs, DataBot uses a compact system prompt and rolling conversation
 summaries. Recent messages remain unchanged, while older messages are periodically
@@ -24,7 +24,14 @@ https://clinton-data-ai-portfolio.streamlit.app/databot
 
 The custom domain is served from an Ubuntu VPS. The Streamlit app runs locally on the server at `127.0.0.1:8501`, and the public domain forwards web traffic to that local Streamlit process through the server's web/proxy configuration.
 
-DataBot supports file uploads directly in the chat input. Users can attach CSV and text-based files, then ask questions about the uploaded data.
+DataBot supports file uploads directly in the chat input. Users can attach CSV and text-based files, then ask questions about the uploaded data. The `Create files` tab generates professional report artifacts locally in the app:
+
+- PDF report
+- SVG chart
+- SVG workflow diagram
+- PowerPoint presentation
+
+CSV uploads in the artifact generator are used to infer chart labels and numeric values.
 
 ## Requirements
 
@@ -126,6 +133,19 @@ Key takeaway: overfitting means the model memorizes the training data instead of
 
 Confidence: 5/5
 ```
+
+## Generating Files
+
+Open the DataBot page, then select the `Create files` tab.
+
+1. Enter a title for the report or presentation.
+2. Add a short brief describing the audience, objective, and desired output.
+3. Add key points, one per line.
+4. Optionally upload a CSV file so DataBot can infer chart data from the first usable numeric column.
+5. Click `Generate files`.
+6. Download the PDF, chart, diagram, or PowerPoint file.
+
+The artifact generator runs locally in the Streamlit app. It does not require the OpenAI API to create the files, although the chat assistant can still help users write better briefs, analysis summaries, slide outlines, chart descriptions, and diagram steps.
 
 ### Example 2: Diagnosing Model Performance
 
