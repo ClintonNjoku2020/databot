@@ -1,8 +1,12 @@
 import csv
+from datetime import UTC, datetime
+from html.parser import HTMLParser
 import io
 import os
+import re
 import tomllib
 from pathlib import Path
+from urllib.parse import urlparse
 
 import httpx
 from dotenv import load_dotenv
@@ -16,6 +20,9 @@ SUMMARY_PREFIX = "Conversation summary:\n"
 MAX_FILE_PREVIEW_CHARS = 12000
 MAX_CSV_ROWS_TO_ANALYZE = 500
 MAX_CSV_SAMPLE_ROWS = 12
+MAX_WEB_SOURCES = 5
+MAX_WEB_SOURCE_CHARS = 6000
+MAX_WEB_CONTEXT_CHARS = 18000
 
 
 SYSTEM_PROMPT = """
@@ -32,6 +39,11 @@ Rules:
 - Explain business meaning as well as technical reasoning.
 - For debugging, identify the likely cause, explain it, and provide a correction.
 - Write clean, readable code and mention important assumptions.
+- When internet source context is provided, use it for clear and understandable
+  market research: summarize market signals, customer segments, competitors,
+  pricing or positioning evidence, risks, and practical next steps. Cite source
+  numbers, separate facts from recommendations, never make up market size or
+  revenue, and say when sources are weak, unavailable, thin, or outdated.
 - Help users plan professional PDFs, charts, diagrams, and presentation content
   when requested. In the Streamlit app, downloadable files are generated from
   the Create files tab.
@@ -126,6 +138,243 @@ def _format_size(size):
     if size < 1024 * 1024:
         return f"{size / 1024:.1f} KB"
     return f"{size / (1024 * 1024):.1f} MB"
+
+
+class _ReadableHTMLParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.parts = []
+        self.title_parts = []
+        self._skip_depth = 0
+        self._in_title = False
+
+    def handle_starttag(self, tag, attrs):
+        if tag in {"script", "style", "noscript", "svg"}:
+            self._skip_depth += 1
+        elif tag == "title":
+            self._in_title = True
+        elif tag in {"p", "br", "li", "tr", "h1", "h2", "h3", "h4"}:
+            self.parts.append("\n")
+
+    def handle_endtag(self, tag):
+        if tag in {"script", "style", "noscript", "svg"} and self._skip_depth:
+            self._skip_depth -= 1
+        elif tag == "title":
+            self._in_title = False
+        elif tag in {"p", "li", "tr", "h1", "h2", "h3", "h4"}:
+            self.parts.append("\n")
+
+    def handle_data(self, data):
+        text = " ".join(data.split())
+        if not text:
+            return
+        if self._in_title:
+            self.title_parts.append(text)
+        if self._skip_depth == 0 and not self._in_title:
+            self.parts.append(text)
+
+    @property
+    def title(self):
+        return " ".join(self.title_parts).strip()
+
+    @property
+    def text(self):
+        lines = []
+        for line in " ".join(self.parts).splitlines():
+            clean = " ".join(line.split())
+            if clean:
+                lines.append(clean)
+        return "\n".join(lines)
+
+
+def extract_urls(text):
+    url_pattern = re.compile(r"https?://[^\s<>)\"']+", re.IGNORECASE)
+    urls = []
+    for match in url_pattern.findall(text or ""):
+        url = match.rstrip(".,;:)]}")
+        if url not in urls:
+            urls.append(url)
+    return urls
+
+
+def _normalise_web_url(url):
+    url = (url or "").strip()
+    if not url:
+        raise ValueError("URL is empty.")
+
+    parsed = urlparse(url)
+    if not parsed.scheme:
+        url = "https://" + url
+        parsed = urlparse(url)
+
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        raise ValueError(f"Unsupported URL: {url}")
+
+    return url
+
+
+def _decode_web_bytes(content):
+    return _decode_file_bytes(content)[0] or content.decode("utf-8", errors="replace")
+
+
+def _extract_readable_text(content, content_type):
+    decoded = _decode_web_bytes(content)
+    if "html" not in (content_type or "").lower():
+        return "", " ".join(decoded.split())
+
+    parser = _ReadableHTMLParser()
+    parser.feed(decoded)
+    return parser.title, parser.text
+
+
+def fetch_web_source(url, client=None):
+    normalised_url = _normalise_web_url(url)
+    close_client = client is None
+    if client is None:
+        client = httpx.Client(
+            trust_env=False,
+            timeout=12,
+            headers={
+                "User-Agent": "DataBot market research assistant (+https://clintonnjoku.com/databot)",
+                "Accept": "text/html,text/plain,application/json;q=0.9,*/*;q=0.8",
+            },
+        )
+
+    try:
+        response = client.get(normalised_url, follow_redirects=True)
+        response.raise_for_status()
+        content_type = response.headers.get("content-type", "unknown")
+        title, text = _extract_readable_text(response.content, content_type)
+        text = text[:MAX_WEB_SOURCE_CHARS].strip()
+        if not text:
+            text = "No readable page text could be extracted."
+
+        return {
+            "url": normalised_url,
+            "final_url": str(response.url),
+            "title": title or "Untitled source",
+            "content_type": content_type,
+            "fetched_at": datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC"),
+            "text": text,
+            "error": None,
+        }
+    except (httpx.HTTPError, ValueError) as error:
+        return {
+            "url": normalised_url if "normalised_url" in locals() else url,
+            "final_url": "",
+            "title": "Unavailable source",
+            "content_type": "",
+            "fetched_at": datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC"),
+            "text": "",
+            "error": str(error),
+        }
+    finally:
+        if close_client:
+            client.close()
+
+
+def fetch_web_sources(urls, client=None):
+    unique_urls = []
+    for url in urls:
+        try:
+            normalised_url = _normalise_web_url(url)
+        except ValueError:
+            normalised_url = url
+        if normalised_url not in unique_urls:
+            unique_urls.append(normalised_url)
+        if len(unique_urls) == MAX_WEB_SOURCES:
+            break
+
+    return [fetch_web_source(url, client=client) for url in unique_urls]
+
+
+def format_web_research_context(sources):
+    if not sources:
+        return ""
+
+    sections = [
+        "Internet source context for market research follows. Use only this extracted source context for factual claims from the web. Cite sources inline as [S1], [S2], etc. Mention failed, weak, unavailable, thin, or outdated sources when they limit confidence."
+    ]
+    for index, source in enumerate(sources, start=1):
+        if source.get("error"):
+            sections.append(
+                f"[S{index}] {source.get('url')}\n"
+                f"Status: Fetch failed: {source.get('error')}"
+            )
+            continue
+
+        sections.append(
+            f"[S{index}] {source.get('title')}\n"
+            f"URL: {source.get('final_url') or source.get('url')}\n"
+            f"Fetched: {source.get('fetched_at')}\n"
+            f"Content type: {source.get('content_type')}\n"
+            f"Extracted text:\n{source.get('text', '')}"
+        )
+
+    context = "\n\n---\n\n".join(sections)
+    return context[:MAX_WEB_CONTEXT_CHARS]
+
+
+def build_user_input_with_web_context(user_text, web_context):
+    user_text = (user_text or "").strip()
+    web_context = (web_context or "").strip()
+    if not web_context:
+        return user_text
+
+    question = user_text or "Conduct clear, understandable market research from these internet sources."
+    return (
+        f"{question}\n\n"
+        "Market research instructions:\n"
+        "- You must cite every factual web-based claim inline using source labels such as [S1] or [S2].\n"
+        "- Include a short `Sources used` section at the end that lists each source label and URL used.\n"
+        "- Start with a plain-English executive summary.\n"
+        "- Use separate sections for `Sourced facts`, `Interpretation`, and `Recommendations`.\n"
+        "- Cover audience/customer signals, competitors or alternatives, pricing/positioning if visible, opportunities, risks, and next steps when the source context supports it.\n"
+        "- Cite source numbers like [S1] for factual claims.\n"
+        "- Do not invent market size, revenue, traffic, or competitor facts; include those only when the source context states them.\n"
+        "- Mention weak, unavailable, thin, or outdated sources and explain how they limit confidence.\n\n"
+        f"{web_context}"
+    )
+
+
+def source_references_markdown(sources):
+    references = []
+    unavailable = []
+    for index, source in enumerate(sources or [], start=1):
+        if source.get("error"):
+            url = source.get("url") or f"Source {index}"
+            unavailable.append(f"[S{index}] {url}: {source.get('error')}")
+            continue
+        url = source.get("final_url") or source.get("url")
+        if not url:
+            continue
+        title = source.get("title") or f"Source {index}"
+        references.append(f"[S{index}] {title}: {url}")
+
+    sections = []
+    if references:
+        sections.append("Sources used:\n" + "\n".join(references))
+    if unavailable:
+        sections.append("Sources unavailable:\n" + "\n".join(unavailable))
+
+    if not sections:
+        return ""
+
+    return "\n\n".join(sections)
+
+
+def unavailable_sources_markdown(sources):
+    unavailable = []
+    for index, source in enumerate(sources or [], start=1):
+        if not source.get("error"):
+            continue
+        url = source.get("url") or f"Source {index}"
+        unavailable.append(f"[S{index}] {url}: {source.get('error')}")
+
+    if not unavailable:
+        return ""
+
+    return "Sources unavailable:\n" + "\n".join(unavailable)
 
 
 def _csv_summary(name, file_bytes, mime_type=None):

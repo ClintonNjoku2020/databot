@@ -24,7 +24,7 @@ https://clinton-data-ai-portfolio.streamlit.app/databot
 
 The custom domain is served from an Ubuntu VPS. The Streamlit app runs locally on the server at `127.0.0.1:8501`, and the public domain forwards web traffic to that local Streamlit process through the server's web/proxy configuration.
 
-DataBot supports file uploads directly in the chat input. Users can attach CSV and text-based files, then ask questions about the uploaded data. The `Create files` tab generates professional report artifacts locally in the app:
+DataBot supports file uploads directly in the chat input. Users can attach CSV and text-based files, then ask questions about the uploaded data. DataBot can also fetch readable text from public web pages supplied by URL and use those sources for clear market research with citations. The `Create files` tab generates professional report artifacts locally in the app:
 
 - PDF report
 - SVG chart
@@ -32,6 +32,22 @@ DataBot supports file uploads directly in the chat input. Users can attach CSV a
 - PowerPoint presentation
 
 CSV uploads in the artifact generator are used to infer chart labels and numeric values.
+
+## Internet Market Research
+
+Open the DataBot page, then expand `Internet market research` in the Chat tab.
+
+1. Select `Fetch internet sources for this question`.
+2. Paste up to five public source URLs, one per line.
+3. Ask a market research question, such as:
+
+```text
+Compare the positioning, customer signals, risks, and next steps for this market.
+```
+
+DataBot fetches the page text, passes the extracted source context into the model, and instructs the model to separate sourced facts from interpretation. Factual web claims should cite source numbers such as `[S1]` and DataBot should state when the sources are too thin to support a conclusion.
+
+You can also paste URLs directly into the chat message. DataBot will use them as source context for that question.
 
 ## Requirements
 

@@ -1,5 +1,6 @@
 from types import SimpleNamespace
 
+import httpx
 from openai import OpenAIError
 
 import databot
@@ -136,3 +137,105 @@ def test_user_input_with_saved_file_context_reuses_existing_upload():
     assert "Which columns are numeric?" in prompt
     assert "Uploaded file context follows" in prompt
     assert "File: sales.csv" in prompt
+
+
+def test_extract_urls_deduplicates_and_trims_punctuation():
+    urls = databot.extract_urls(
+        "Compare https://example.com/report, and https://example.com/report against https://market.test/a."
+    )
+
+    assert urls == ["https://example.com/report", "https://market.test/a"]
+
+
+def test_fetch_web_source_extracts_readable_html_with_mock_client():
+    def handler(request):
+        return httpx.Response(
+            200,
+            headers={"content-type": "text/html; charset=utf-8"},
+            text=(
+                "<html><head><title>Market Report</title><style>.x{}</style></head>"
+                "<body><h1>Cloud analytics market</h1><script>ignore()</script>"
+                "<p>Buyers want easier reporting and transparent pricing.</p></body></html>"
+            ),
+            request=request,
+        )
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+
+    source = databot.fetch_web_source("https://example.com/report", client=client)
+
+    assert source["error"] is None
+    assert source["title"] == "Market Report"
+    assert "Cloud analytics market" in source["text"]
+    assert "transparent pricing" in source["text"]
+    assert "ignore()" not in source["text"]
+
+
+def test_web_research_context_and_prompt_require_citations():
+    sources = [
+        {
+            "url": "https://example.com/report",
+            "final_url": "https://example.com/report",
+            "title": "Market Report",
+            "content_type": "text/html",
+            "fetched_at": "2026-07-20 10:00 UTC",
+            "text": "Customers compare pricing, support, and setup time.",
+            "error": None,
+        }
+    ]
+
+    context = databot.format_web_research_context(sources)
+    prompt = databot.build_user_input_with_web_context(
+        "Research this market.",
+        context,
+    )
+
+    assert "[S1] Market Report" in prompt
+    assert "Cite source numbers like [S1]" in prompt
+    assert "Sources used" in prompt
+    assert "Sourced facts" in prompt
+    assert "Recommendations" in prompt
+    assert "Do not invent market size, revenue" in prompt
+    assert "only when the source context states them" in prompt
+    assert "weak, unavailable, thin, or outdated sources" in prompt
+
+
+def test_source_references_markdown_lists_successful_and_unavailable_sources():
+    references = databot.source_references_markdown(
+        [
+            {
+                "title": "Market Report",
+                "final_url": "https://example.com/report",
+                "url": "https://example.com/report",
+                "error": None,
+            },
+            {
+                "title": "Blocked",
+                "url": "https://example.com/blocked",
+                "error": "403 Forbidden",
+            },
+        ]
+    )
+
+    assert "[S1] Market Report: https://example.com/report" in references
+    assert "Sources unavailable:" in references
+    assert "[S2] https://example.com/blocked: 403 Forbidden" in references
+
+
+def test_unavailable_sources_markdown_lists_failed_sources_only():
+    references = databot.unavailable_sources_markdown(
+        [
+            {
+                "title": "Market Report",
+                "final_url": "https://example.com/report",
+                "url": "https://example.com/report",
+                "error": None,
+            },
+            {
+                "url": "https://example.com/blocked",
+                "error": "403 Forbidden",
+            },
+        ]
+    )
+
+    assert references == "Sources unavailable:\n[S2] https://example.com/blocked: 403 Forbidden"

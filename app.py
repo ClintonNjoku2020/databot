@@ -575,6 +575,19 @@ def databot_page():
                 st.session_state.conversation_history = databot.create_conversation_history()
                 st.rerun()
 
+        with st.expander("Internet market research", expanded=False):
+            use_web_research = st.checkbox(
+                "Fetch internet sources for this question",
+                value=False,
+                help="DataBot will fetch readable text from the URLs you provide and use it as source context.",
+            )
+            research_urls_text = st.text_area(
+                "Source URLs",
+                placeholder="https://example.com/report\nhttps://example.com/competitor",
+                height=92,
+                help="Add up to five public web pages, one per line. You can also paste URLs directly into your chat message.",
+            )
+
         for message in st.session_state.messages:
             with st.chat_message(message["role"]):
                 st.write(message["content"])
@@ -607,6 +620,42 @@ def databot_page():
             if chat_uploaded_files:
                 active_file_context = databot.summarize_uploaded_files(chat_uploaded_files)
             model_input = databot.build_user_input_with_file_context(user_text, active_file_context)
+            web_sources = []
+
+            source_urls = databot.extract_urls(user_text)
+            source_urls.extend(databot.extract_urls(research_urls_text))
+            if use_web_research or source_urls:
+                source_urls = source_urls[: databot.MAX_WEB_SOURCES]
+                if source_urls:
+                    with st.spinner("Fetching internet sources..."):
+                        web_sources = databot.fetch_web_sources(source_urls)
+                    web_context = databot.format_web_research_context(web_sources)
+                    model_input = databot.build_user_input_with_web_context(model_input, web_context)
+                    successful_sources = [
+                        source.get("final_url") or source.get("url")
+                        for source in web_sources
+                        if not source.get("error")
+                    ]
+                    failed_sources = [
+                        source.get("url")
+                        for source in web_sources
+                        if source.get("error")
+                    ]
+                    if successful_sources:
+                        display_input = (
+                            f"{display_input}\n\n"
+                            f"Internet sources: {', '.join(successful_sources)}"
+                        )
+                    if failed_sources:
+                        display_input = (
+                            f"{display_input}\n\n"
+                            f"Sources not fetched: {', '.join(failed_sources)}"
+                        )
+                elif use_web_research:
+                    display_input = (
+                        f"{display_input}\n\n"
+                        "Internet research was enabled, but no source URLs were provided."
+                    )
 
             st.session_state.messages.append({"role": "user", "content": display_input})
             with st.chat_message("user"):
@@ -625,6 +674,13 @@ def databot_page():
                                 conversation_history=st.session_state.conversation_history,
                                 user_input=model_input,
                             )
+                            source_references = databot.source_references_markdown(web_sources)
+                            if source_references and "Sources used:" not in answer:
+                                answer = f"{answer.rstrip()}\n\n{source_references}"
+                            else:
+                                unavailable_sources = databot.unavailable_sources_markdown(web_sources)
+                                if unavailable_sources and "Sources unavailable:" not in answer:
+                                    answer = f"{answer.rstrip()}\n\n{unavailable_sources}"
                         except OpenAIError as error:
                             answer = databot.format_openai_error(error)
                     st.write(answer)
