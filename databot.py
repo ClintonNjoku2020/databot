@@ -23,13 +23,21 @@ MAX_CSV_SAMPLE_ROWS = 12
 MAX_WEB_SOURCES = 5
 MAX_WEB_SOURCE_CHARS = 6000
 MAX_WEB_CONTEXT_CHARS = 18000
+SENTIMENT_ANALYSIS_MODE = "sentiment"
+MARKET_RESEARCH_MODE = "market"
+SENTIMENT_REQUEST_PATTERN = re.compile(
+    r"\b(sentiment|public opinion|reputation|brand perception|perception|"
+    r"favourability|favorability|approval|backlash|controversy|criticis(?:e|m)|"
+    r"criticiz(?:e|ed|ing)|praise|negative reaction|positive reaction)\b",
+    re.IGNORECASE,
+)
 
 
 SYSTEM_PROMPT = """
 You are DataBot, a professional assistant for data science, analytics, machine
 learning, AI, statistics, Python, SQL, data engineering, visualisation, prompt
-engineering, APIs, GitHub, professional reporting, charts, diagrams,
-presentations, and related technical workflows.
+engineering, APIs, GitHub, reporting, charts, diagrams, presentations, and
+related technical workflows.
 
 Rules:
 - Be accurate, practical, concise, and beginner-friendly. Never invent facts,
@@ -39,11 +47,12 @@ Rules:
 - Explain business meaning as well as technical reasoning.
 - For debugging, identify the likely cause, explain it, and provide a correction.
 - Write clean, readable code and mention important assumptions.
-- When internet source context is provided, use it for clear and understandable
-  market research: summarize market signals, customer segments, competitors,
-  pricing or positioning evidence, risks, and practical next steps. Cite source
-  numbers, separate facts from recommendations, never make up market size or
-  revenue, and say when sources are weak, unavailable, thin, or outdated.
+- When internet source context is provided, use it for clear market research or
+  sentiment analysis. Cite source numbers, separate facts from interpretation,
+  never invent market size, public opinion, motives, or reputation, and say
+  when sources are weak, unavailable, thin, or outdated.
+- For sentiment analysis of public figures, personalities, or companies,
+  identify target, evidence, audience/speaker, label, drivers, risks, and limits.
 - Help users plan professional PDFs, charts, diagrams, and presentation content
   when requested. In the Streamlit app, downloadable files are generated from
   the Create files tab.
@@ -315,15 +324,34 @@ def format_web_research_context(sources):
     return context[:MAX_WEB_CONTEXT_CHARS]
 
 
-def build_user_input_with_web_context(user_text, web_context):
-    user_text = (user_text or "").strip()
-    web_context = (web_context or "").strip()
-    if not web_context:
-        return user_text
+def is_sentiment_analysis_request(text):
+    return bool(SENTIMENT_REQUEST_PATTERN.search(text or ""))
 
-    question = user_text or "Conduct clear, understandable market research from these internet sources."
+
+def _normalise_analysis_mode(analysis_mode, user_text=""):
+    if analysis_mode == SENTIMENT_ANALYSIS_MODE:
+        return SENTIMENT_ANALYSIS_MODE
+    if analysis_mode == MARKET_RESEARCH_MODE:
+        return MARKET_RESEARCH_MODE
+    if is_sentiment_analysis_request(user_text):
+        return SENTIMENT_ANALYSIS_MODE
+    return MARKET_RESEARCH_MODE
+
+
+def _analysis_mode_instructions(analysis_mode):
+    if analysis_mode == SENTIMENT_ANALYSIS_MODE:
+        return (
+            "Sentiment analysis instructions:\n"
+            "- Analyze sentiment toward named public figures, personalities, or companies only from the provided user text and extracted source context.\n"
+            "- Identify the target entity, likely speaker or audience when visible, sentiment label, intensity, evidence, drivers, risks, and limitations.\n"
+            "- Use separate sections for `Executive summary`, `Evidence table`, `Interpretation`, `Limitations`, and `Sources used`.\n"
+            "- You must cite every factual web-based claim inline using source labels such as [S1] or [S2].\n"
+            "- Do not claim overall public opinion, reputation, motives, market impact, or trend direction unless the source context supports it.\n"
+            "- Avoid private-person analysis and sensitive personal inferences; focus on public statements, coverage, reviews, posts, or provided text.\n"
+            "- Mention weak, unavailable, thin, biased, or outdated sources and explain how they limit confidence."
+        )
+
     return (
-        f"{question}\n\n"
         "Market research instructions:\n"
         "- You must cite every factual web-based claim inline using source labels such as [S1] or [S2].\n"
         "- Include a short `Sources used` section at the end that lists each source label and URL used.\n"
@@ -332,7 +360,24 @@ def build_user_input_with_web_context(user_text, web_context):
         "- Cover audience/customer signals, competitors or alternatives, pricing/positioning if visible, opportunities, risks, and next steps when the source context supports it.\n"
         "- Cite source numbers like [S1] for factual claims.\n"
         "- Do not invent market size, revenue, traffic, or competitor facts; include those only when the source context states them.\n"
-        "- Mention weak, unavailable, thin, or outdated sources and explain how they limit confidence.\n\n"
+        "- Mention weak, unavailable, thin, or outdated sources and explain how they limit confidence."
+    )
+
+
+def build_user_input_with_web_context(user_text, web_context, analysis_mode=None):
+    user_text = (user_text or "").strip()
+    web_context = (web_context or "").strip()
+    if not web_context:
+        return user_text
+
+    selected_mode = _normalise_analysis_mode(analysis_mode, user_text)
+    if selected_mode == SENTIMENT_ANALYSIS_MODE:
+        question = user_text or "Conduct clear sentiment analysis from these internet sources."
+    else:
+        question = user_text or "Conduct clear, understandable market research from these internet sources."
+    return (
+        f"{question}\n\n"
+        f"{_analysis_mode_instructions(selected_mode)}\n\n"
         f"{web_context}"
     )
 

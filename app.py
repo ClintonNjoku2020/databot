@@ -575,15 +575,20 @@ def databot_page():
                 st.session_state.conversation_history = databot.create_conversation_history()
                 st.rerun()
 
-        with st.expander("Internet market research", expanded=False):
+        with st.expander("Internet research", expanded=False):
             use_web_research = st.checkbox(
                 "Fetch internet sources for this question",
                 value=False,
                 help="DataBot will fetch readable text from the URLs you provide and use it as source context.",
             )
+            research_mode = st.selectbox(
+                "Analysis type",
+                options=["Auto-detect", "Market research", "Sentiment analysis"],
+                help="Choose sentiment analysis for public figures, personalities, brands, or companies.",
+            )
             research_urls_text = st.text_area(
                 "Source URLs",
-                placeholder="https://example.com/report\nhttps://example.com/competitor",
+                placeholder="https://example.com/news\nhttps://example.com/reviews",
                 height=92,
                 help="Add up to five public web pages, one per line. You can also paste URLs directly into your chat message.",
             )
@@ -630,7 +635,16 @@ def databot_page():
                     with st.spinner("Fetching internet sources..."):
                         web_sources = databot.fetch_web_sources(source_urls)
                     web_context = databot.format_web_research_context(web_sources)
-                    model_input = databot.build_user_input_with_web_context(model_input, web_context)
+                    analysis_mode = None
+                    if research_mode == "Market research":
+                        analysis_mode = databot.MARKET_RESEARCH_MODE
+                    elif research_mode == "Sentiment analysis":
+                        analysis_mode = databot.SENTIMENT_ANALYSIS_MODE
+                    model_input = databot.build_user_input_with_web_context(
+                        model_input,
+                        web_context,
+                        analysis_mode=analysis_mode,
+                    )
                     successful_sources = [
                         source.get("final_url") or source.get("url")
                         for source in web_sources

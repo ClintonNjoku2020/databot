@@ -200,6 +200,42 @@ def test_web_research_context_and_prompt_require_citations():
     assert "weak, unavailable, thin, or outdated sources" in prompt
 
 
+def test_sentiment_analysis_request_is_detected_from_prompt_text():
+    assert databot.is_sentiment_analysis_request(
+        "Analyze public sentiment and reputation around Example Corp."
+    )
+    assert not databot.is_sentiment_analysis_request(
+        "Compare customer segments and pricing for this market."
+    )
+
+
+def test_sentiment_analysis_prompt_requires_evidence_and_limits():
+    sources = [
+        {
+            "url": "https://example.com/profile",
+            "final_url": "https://example.com/profile",
+            "title": "Public Reaction",
+            "content_type": "text/html",
+            "fetched_at": "2026-07-20 10:00 UTC",
+            "text": "Customers praised Example Corp support but criticized pricing.",
+            "error": None,
+        }
+    ]
+
+    prompt = databot.build_user_input_with_web_context(
+        "Analyze sentiment toward Example Corp.",
+        databot.format_web_research_context(sources),
+    )
+
+    assert "Sentiment analysis instructions" in prompt
+    assert "public figures, personalities, or companies" in prompt
+    assert "Evidence table" in prompt
+    assert "sentiment label" in prompt
+    assert "Do not claim overall public opinion" in prompt
+    assert "private-person analysis" in prompt
+    assert "Customers praised Example Corp" in prompt
+
+
 def test_source_references_markdown_lists_successful_and_unavailable_sources():
     references = databot.source_references_markdown(
         [
