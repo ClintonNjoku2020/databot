@@ -626,6 +626,7 @@ def databot_page():
                 active_file_context = databot.summarize_uploaded_files(chat_uploaded_files)
             model_input = databot.build_user_input_with_file_context(user_text, active_file_context)
             web_sources = []
+            direct_answer = None
 
             source_urls = databot.extract_urls(user_text)
             source_urls.extend(databot.extract_urls(research_urls_text))
@@ -640,10 +641,9 @@ def databot_page():
                         analysis_mode = databot.MARKET_RESEARCH_MODE
                     elif research_mode == "Sentiment analysis":
                         analysis_mode = databot.SENTIMENT_ANALYSIS_MODE
-                    model_input = databot.build_user_input_with_web_context(
+                    selected_analysis_mode = databot.resolve_analysis_mode(
+                        analysis_mode,
                         model_input,
-                        web_context,
-                        analysis_mode=analysis_mode,
                     )
                     successful_sources = [
                         source.get("final_url") or source.get("url")
@@ -665,6 +665,17 @@ def databot_page():
                             f"{display_input}\n\n"
                             f"Sources not fetched: {', '.join(failed_sources)}"
                         )
+                    if (
+                        selected_analysis_mode == databot.SENTIMENT_ANALYSIS_MODE
+                        and not databot.has_successful_web_sources(web_sources)
+                    ):
+                        direct_answer = databot.insufficient_sentiment_sources_markdown(web_sources)
+                    else:
+                        model_input = databot.build_user_input_with_web_context(
+                            model_input,
+                            web_context,
+                            analysis_mode=selected_analysis_mode,
+                        )
                 elif use_web_research:
                     display_input = (
                         f"{display_input}\n\n"
@@ -678,7 +689,9 @@ def databot_page():
             with st.chat_message("assistant"):
                 with st.spinner("Working on your question..."):
                     api_key = databot.get_api_key()
-                    if not api_key:
+                    if direct_answer:
+                        answer = direct_answer
+                    elif not api_key:
                         answer = "DataBot is not configured yet. Add OPENAI_API_KEY to the app secrets."
                     else:
                         try:

@@ -338,6 +338,10 @@ def _normalise_analysis_mode(analysis_mode, user_text=""):
     return MARKET_RESEARCH_MODE
 
 
+def resolve_analysis_mode(analysis_mode=None, user_text=""):
+    return _normalise_analysis_mode(analysis_mode, user_text)
+
+
 def _analysis_mode_instructions(analysis_mode):
     if analysis_mode == SENTIMENT_ANALYSIS_MODE:
         return (
@@ -406,6 +410,26 @@ def source_references_markdown(sources):
         return ""
 
     return "\n\n".join(sections)
+
+
+def has_successful_web_sources(sources):
+    return any(not source.get("error") and source.get("text") for source in sources or [])
+
+
+def insufficient_sentiment_sources_markdown(sources):
+    unavailable_sources = unavailable_sources_markdown(sources)
+    response = (
+        "I cannot conduct a clear sentiment analysis from these sources because none of the provided pages returned readable text.\n\n"
+        "What I can say from the evidence:\n"
+        "- The target may be named in your question, but the fetched sources provide no accessible sentiment evidence.\n"
+        "- I should not infer public opinion, reputation, motives, trend direction, or sentiment drivers from unavailable pages.\n\n"
+        "Next step:\n"
+        "Use publicly readable URLs, upload accessible text, or paste excerpts from reviews, news coverage, social posts, or company commentary."
+    )
+    if unavailable_sources:
+        response = f"{response}\n\n{unavailable_sources}"
+
+    return f"{response}\n\nConfidence: 5/5"
 
 
 def unavailable_sources_markdown(sources):

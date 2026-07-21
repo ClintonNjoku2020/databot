@@ -236,6 +236,28 @@ def test_sentiment_analysis_prompt_requires_evidence_and_limits():
     assert "Customers praised Example Corp" in prompt
 
 
+def test_sentiment_analysis_with_no_successful_sources_refuses_speculation():
+    sources = [
+        {
+            "url": "https://example.com/blocked",
+            "final_url": "",
+            "title": "Unavailable source",
+            "content_type": "",
+            "fetched_at": "2026-07-20 10:00 UTC",
+            "text": "",
+            "error": "403 Forbidden",
+        }
+    ]
+
+    response = databot.insufficient_sentiment_sources_markdown(sources)
+
+    assert not databot.has_successful_web_sources(sources)
+    assert "none of the provided pages returned readable text" in response
+    assert "should not infer public opinion" in response
+    assert "403 Forbidden" in response
+    assert "Confidence: 5/5" in response
+
+
 def test_source_references_markdown_lists_successful_and_unavailable_sources():
     references = databot.source_references_markdown(
         [
