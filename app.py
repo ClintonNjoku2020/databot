@@ -1,15 +1,31 @@
 import base64
 import html
+import importlib.util
 from pathlib import Path
+import sys
 
 import streamlit as st
 from openai import OpenAIError
 
 import artifact_generator
-import databot
 
 
 ASSET_DIR = Path(__file__).parent / "assets"
+
+
+def load_project_module(module_name):
+    module_path = Path(__file__).with_name(f"{module_name}.py")
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Could not load {module_name} from {module_path}")
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+databot = load_project_module("databot")
 
 
 st.set_page_config(
