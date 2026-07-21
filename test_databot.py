@@ -232,6 +232,10 @@ def test_sentiment_analysis_prompt_requires_evidence_and_limits():
     assert "Evidence table" in prompt
     assert "sentiment label" in prompt
     assert "Do not claim overall public opinion" in prompt
+    assert "fewer than two readable sources" in prompt
+    assert "confidence no higher than 3/5" in prompt
+    assert "no readable sources" in prompt
+    assert "confidence no higher than 1/5" in prompt
     assert "private-person analysis" in prompt
     assert "Customers praised Example Corp" in prompt
 
@@ -255,7 +259,7 @@ def test_sentiment_analysis_with_no_successful_sources_refuses_speculation():
     assert "none of the provided pages returned readable text" in response
     assert "should not infer public opinion" in response
     assert "403 Forbidden" in response
-    assert "Confidence: 5/5" in response
+    assert "Confidence: 1/5" in response
 
 
 def test_source_references_markdown_lists_successful_and_unavailable_sources():

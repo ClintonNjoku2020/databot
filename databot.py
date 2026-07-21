@@ -351,6 +351,8 @@ def _analysis_mode_instructions(analysis_mode):
             "- Use separate sections for `Executive summary`, `Evidence table`, `Interpretation`, `Limitations`, and `Sources used`.\n"
             "- You must cite every factual web-based claim inline using source labels such as [S1] or [S2].\n"
             "- Do not claim overall public opinion, reputation, motives, market impact, or trend direction unless the source context supports it.\n"
+            "- When fewer than two readable sources are available, call the analysis limited, avoid broad sentiment conclusions, and use confidence no higher than 3/5.\n"
+            "- When no readable sources are available, say there is insufficient evidence and use confidence no higher than 1/5.\n"
             "- Avoid private-person analysis and sensitive personal inferences; focus on public statements, coverage, reviews, posts, or provided text.\n"
             "- Mention weak, unavailable, thin, biased, or outdated sources and explain how they limit confidence."
         )
@@ -429,7 +431,7 @@ def insufficient_sentiment_sources_markdown(sources):
     if unavailable_sources:
         response = f"{response}\n\n{unavailable_sources}"
 
-    return f"{response}\n\nConfidence: 5/5"
+    return f"{response}\n\nConfidence: 1/5"
 
 
 def unavailable_sources_markdown(sources):
