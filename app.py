@@ -431,6 +431,7 @@ def mobile_navigation():
             <a href="/" target="_self">Home</a>
             <a href="/about" target="_self">About</a>
             <a class="primary" href="/databot" target="_self">DataBot</a>
+            <a href="/servicebot/" target="_self">ServiceBot</a>
             <a href="/projects" target="_self">Projects</a>
             <a href="/contact" target="_self">Contact</a>
         </nav>
@@ -890,6 +891,12 @@ pages = {
         st.Page(home, title="Home", icon=":material/home:", url_path="", default=True),
         st.Page(about, title="About Me", icon=":material/person:", url_path="about"),
         st.Page(databot_page, title="DataBot", icon=":material/smart_toy:", url_path="databot"),
+        st.Page(
+            lambda: st.markdown("[Open ServiceBot](/servicebot/)"),
+            title="ServiceBot",
+            icon=":material/support_agent:",
+            url_path="servicebot-link",
+        ),
         st.Page(projects, title="Projects", icon=":material/work:", url_path="projects"),
         st.Page(contact, title="Contact", icon=":material/mail:", url_path="contact"),
     ]
