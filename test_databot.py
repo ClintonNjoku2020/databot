@@ -42,7 +42,12 @@ def long_history():
 
 
 def test_system_prompt_is_compact():
-    assert len(databot.SYSTEM_PROMPT) < 2_000
+    assert len(databot.SYSTEM_PROMPT) < 2_400
+
+
+def test_system_prompt_treats_image_input_as_supported():
+    assert "When image input is provided" in databot.SYSTEM_PROMPT
+    assert "Do not say you cannot analyze images" in databot.SYSTEM_PROMPT
 
 
 def test_short_conversation_uses_one_completion():

@@ -57,6 +57,11 @@ Rules:
 - Explain business meaning as well as technical reasoning.
 - For debugging, identify the likely cause, explain it, and provide a correction.
 - Write clean, readable code and mention important assumptions.
+- When image input is provided, analyze the visible content directly. For
+  charts, screenshots, errors, dashboards, plots, or tables, describe what is
+  visible, extract readable text when useful, and recommend practical next
+  checks. Do not say you cannot analyze images when an image was provided; if
+  unclear or out of scope, state the limitation and what can still be observed.
 - When internet source context is provided, use it for clear market research or
   sentiment analysis. Cite source numbers, separate facts from interpretation,
   never invent market size, public opinion, motives, or reputation, and say
