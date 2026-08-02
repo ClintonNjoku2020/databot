@@ -617,7 +617,7 @@ def databot_page():
         prompt = st.chat_input(
             "Ask a question about your data or a data science topic...",
             accept_file="multiple",
-            file_type=["csv", "txt", "md", "json", "py", "sql"],
+            file_type=["csv", "txt", "md", "json", "py", "sql", "png", "jpg", "jpeg", "webp", "gif"],
         )
         if prompt:
             if isinstance(prompt, str):
@@ -631,16 +631,31 @@ def databot_page():
                 return
 
             chat_file_names = [uploaded_file.name for uploaded_file in chat_uploaded_files]
+            image_uploads = [
+                uploaded_file
+                for uploaded_file in chat_uploaded_files
+                if databot.is_supported_image_upload(uploaded_file)
+            ]
+            text_uploads = [
+                uploaded_file
+                for uploaded_file in chat_uploaded_files
+                if not databot.is_supported_image_upload(uploaded_file)
+            ]
             display_input = user_text.strip() or "Uploaded file(s) for DataBot to inspect."
             if chat_file_names:
                 display_input = (
                     f"{display_input}\n\n"
                     f"File context: {', '.join(chat_file_names)}"
                 )
+            if image_uploads:
+                display_input = (
+                    f"{display_input}\n\n"
+                    f"Image analysis enabled for: {', '.join(uploaded_file.name for uploaded_file in image_uploads)}"
+                )
 
             active_file_context = ""
-            if chat_uploaded_files:
-                active_file_context = databot.summarize_uploaded_files(chat_uploaded_files)
+            if text_uploads:
+                active_file_context = databot.summarize_uploaded_files(text_uploads)
             model_input = databot.build_user_input_with_file_context(user_text, active_file_context)
             web_sources = []
             direct_answer = None
@@ -698,6 +713,7 @@ def databot_page():
                         f"{display_input}\n\n"
                         "Internet research was enabled, but no source URLs were provided."
                     )
+            model_message_content = databot.build_user_message_content(model_input, image_uploads)
 
             st.session_state.messages.append({"role": "user", "content": display_input})
             with st.chat_message("user"):
@@ -714,9 +730,9 @@ def databot_page():
                         try:
                             answer, st.session_state.conversation_history = databot.get_databot_reply(
                                 client=databot.create_client(api_key),
-                                model=databot.get_model(),
+                                model=databot.get_vision_model() if image_uploads else databot.get_model(),
                                 conversation_history=st.session_state.conversation_history,
-                                user_input=model_input,
+                                user_input=model_message_content,
                             )
                             source_references = databot.source_references_markdown(web_sources)
                             if source_references and "Sources used:" not in answer:

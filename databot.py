@@ -1,7 +1,9 @@
+import base64
 import csv
 from datetime import UTC, datetime
 from html.parser import HTMLParser
 import io
+import mimetypes
 import os
 import re
 import tomllib
@@ -14,6 +16,7 @@ from openai import AuthenticationError, BadRequestError, OpenAI, OpenAIError, Ra
 
 
 DEFAULT_MODEL = "gpt-4o-mini"
+DEFAULT_VISION_MODEL = DEFAULT_MODEL
 RECENT_MESSAGES_TO_KEEP = 8
 SUMMARIZE_AFTER_MESSAGES = 16
 SUMMARY_PREFIX = "Conversation summary:\n"
@@ -23,6 +26,13 @@ MAX_CSV_SAMPLE_ROWS = 12
 MAX_WEB_SOURCES = 5
 MAX_WEB_SOURCE_CHARS = 6000
 MAX_WEB_CONTEXT_CHARS = 18000
+SUPPORTED_IMAGE_MIME_TYPES = {
+    "image/png",
+    "image/jpeg",
+    "image/webp",
+    "image/gif",
+}
+SUPPORTED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
 SENTIMENT_ANALYSIS_MODE = "sentiment"
 MARKET_RESEARCH_MODE = "market"
 SENTIMENT_REQUEST_PATTERN = re.compile(
@@ -117,6 +127,20 @@ def get_model():
     return DEFAULT_MODEL
 
 
+def get_vision_model():
+    load_dotenv()
+    streamlit_model = get_streamlit_secret("OPENAI_VISION_MODEL")
+    if streamlit_model:
+        return streamlit_model
+
+    model = os.getenv("OPENAI_VISION_MODEL")
+    model = model.strip() if model else None
+    if model:
+        return model
+
+    return DEFAULT_VISION_MODEL
+
+
 def create_client(api_key):
     return OpenAI(
         api_key=api_key,
@@ -147,6 +171,84 @@ def _format_size(size):
     if size < 1024 * 1024:
         return f"{size / 1024:.1f} KB"
     return f"{size / (1024 * 1024):.1f} MB"
+
+
+def _get_uploaded_file_bytes(uploaded_file):
+    if hasattr(uploaded_file, "getvalue"):
+        return uploaded_file.getvalue()
+
+    return uploaded_file.read()
+
+
+def get_uploaded_file_name(uploaded_file):
+    return getattr(uploaded_file, "name", "uploaded file")
+
+
+def get_uploaded_file_mime_type(uploaded_file):
+    mime_type = getattr(uploaded_file, "type", None)
+    if mime_type:
+        return mime_type
+
+    guessed_type, _ = mimetypes.guess_type(get_uploaded_file_name(uploaded_file))
+    return guessed_type
+
+
+def is_supported_image_upload(uploaded_file):
+    name = get_uploaded_file_name(uploaded_file)
+    suffix = Path(name).suffix.lower()
+    mime_type = get_uploaded_file_mime_type(uploaded_file)
+    return mime_type in SUPPORTED_IMAGE_MIME_TYPES or suffix in SUPPORTED_IMAGE_EXTENSIONS
+
+
+def build_image_content_part(uploaded_file, detail="auto"):
+    file_bytes = _get_uploaded_file_bytes(uploaded_file)
+    mime_type = get_uploaded_file_mime_type(uploaded_file)
+    if mime_type not in SUPPORTED_IMAGE_MIME_TYPES:
+        guessed_type, _ = mimetypes.guess_type(get_uploaded_file_name(uploaded_file))
+        mime_type = guessed_type if guessed_type in SUPPORTED_IMAGE_MIME_TYPES else "image/png"
+    encoded_image = base64.b64encode(file_bytes).decode("ascii")
+    return {
+        "type": "image_url",
+        "image_url": {
+            "url": f"data:{mime_type};base64,{encoded_image}",
+            "detail": detail,
+        },
+    }
+
+
+def build_user_message_content(user_text, image_files=None):
+    image_files = image_files or []
+    if not image_files:
+        return user_text
+
+    text = (user_text or "").strip()
+    if not text:
+        text = (
+            "Analyze the uploaded image(s). For charts, screenshots, errors, or visual outputs, "
+            "describe what is visible, extract important text when possible, identify likely issues, "
+            "and recommend practical data science next steps."
+        )
+
+    content = [{"type": "text", "text": text}]
+    content.extend(build_image_content_part(uploaded_file) for uploaded_file in image_files)
+    return content
+
+
+def summarize_message_content_for_history(content):
+    if not isinstance(content, list):
+        return content
+
+    text_parts = []
+    image_count = 0
+    for part in content:
+        if part.get("type") == "text" and part.get("text"):
+            text_parts.append(part["text"])
+        elif part.get("type") == "image_url":
+            image_count += 1
+
+    summary = "\n\n".join(text_parts).strip()
+    image_note = f"Uploaded {image_count} image(s) for analysis on this turn."
+    return f"{summary}\n\n{image_note}" if summary else image_note
 
 
 class _ReadableHTMLParser(HTMLParser):
@@ -523,12 +625,17 @@ def _csv_summary(name, file_bytes, mime_type=None):
 
 
 def summarize_uploaded_file(uploaded_file):
-    name = getattr(uploaded_file, "name", "uploaded file")
-    mime_type = getattr(uploaded_file, "type", None)
-    if hasattr(uploaded_file, "getvalue"):
-        file_bytes = uploaded_file.getvalue()
-    else:
-        file_bytes = uploaded_file.read()
+    name = get_uploaded_file_name(uploaded_file)
+    mime_type = get_uploaded_file_mime_type(uploaded_file)
+    file_bytes = _get_uploaded_file_bytes(uploaded_file)
+
+    if is_supported_image_upload(uploaded_file):
+        return (
+            f"File: {name}\n"
+            f"Type: image ({mime_type or Path(name).suffix.lower().lstrip('.') or 'unknown type'})\n"
+            f"Size: {_format_size(len(file_bytes))}\n"
+            "Status: Image attached for visual analysis by the model."
+        )
 
     suffix = Path(name).suffix.lower()
     if suffix == ".csv" or mime_type == "text/csv":
@@ -656,26 +763,51 @@ def summarize_conversation_history(client, model, conversation_history):
     return [conversation_history[0], summary_message, *recent_messages]
 
 
+def _message_content_has_images(content):
+    return isinstance(content, list) and any(part.get("type") == "image_url" for part in content)
+
+
+def _message_content_is_empty(content):
+    if isinstance(content, str):
+        return not content.strip()
+    if isinstance(content, list):
+        return not any(
+            (part.get("type") == "text" and part.get("text", "").strip())
+            or part.get("type") == "image_url"
+            for part in content
+        )
+    return not content
+
+
 def get_databot_reply(client, model, conversation_history, user_input):
-    user_input = user_input.strip()
-    if not user_input:
+    if isinstance(user_input, str):
+        user_input = user_input.strip()
+    if _message_content_is_empty(user_input):
         return "", conversation_history
 
-    updated_history = conversation_history + [{"role": "user", "content": user_input}]
-    updated_history = summarize_conversation_history(
-        client,
-        model,
-        updated_history,
-    )
+    user_message = {"role": "user", "content": user_input}
+    if _message_content_has_images(user_input):
+        request_history = summarize_conversation_history(client, model, conversation_history)
+        request_history = request_history + [user_message]
+    else:
+        request_history = conversation_history + [user_message]
+        request_history = summarize_conversation_history(
+            client,
+            model,
+            request_history,
+        )
 
     response = client.chat.completions.create(
         model=model,
-        messages=updated_history,
+        messages=request_history,
     )
     assistant_reply = response.choices[0].message.content or "I could not generate a response."
 
-    updated_history.append({"role": "assistant", "content": assistant_reply})
-    return assistant_reply, updated_history
+    stored_history = request_history[:-1] + [
+        {"role": "user", "content": summarize_message_content_for_history(user_input)},
+        {"role": "assistant", "content": assistant_reply},
+    ]
+    return assistant_reply, stored_history
 
 
 def format_openai_error(error):
@@ -684,6 +816,13 @@ def format_openai_error(error):
 
     if isinstance(error, BadRequestError) and getattr(error, "code", None) == "model_not_found":
         return f"OpenAI could not access the selected model. Set OPENAI_MODEL to {DEFAULT_MODEL}, then try again."
+
+    error_text = str(error).lower()
+    if isinstance(error, BadRequestError) and ("image" in error_text or "vision" in error_text):
+        return (
+            "OpenAI rejected the image request. Check that OPENAI_VISION_MODEL is set to a vision-capable model "
+            f"such as {DEFAULT_VISION_MODEL}, then try again with a PNG, JPG, WEBP, or non-animated GIF."
+        )
 
     if isinstance(error, RateLimitError):
         if getattr(error, "code", None) == "insufficient_quota":

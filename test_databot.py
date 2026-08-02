@@ -1,7 +1,7 @@
 from types import SimpleNamespace
 
 import httpx
-from openai import OpenAIError
+from openai import BadRequestError, OpenAIError
 
 import databot
 
@@ -137,6 +137,80 @@ def test_user_input_with_saved_file_context_reuses_existing_upload():
     assert "Which columns are numeric?" in prompt
     assert "Uploaded file context follows" in prompt
     assert "File: sales.csv" in prompt
+
+
+def test_image_upload_is_encoded_as_chat_completion_image_part():
+    uploaded_file = SimpleNamespace(
+        name="chart.png",
+        type="image/png",
+        getvalue=lambda: b"fake-png-bytes",
+    )
+
+    content = databot.build_user_message_content("What does this chart show?", [uploaded_file])
+
+    assert content[0] == {"type": "text", "text": "What does this chart show?"}
+    assert content[1]["type"] == "image_url"
+    assert content[1]["image_url"]["url"].startswith("data:image/png;base64,")
+    assert content[1]["image_url"]["detail"] == "auto"
+
+
+def test_image_upload_summary_avoids_binary_preview():
+    uploaded_file = SimpleNamespace(
+        name="error-screenshot.jpg",
+        type="image/jpeg",
+        getvalue=lambda: b"\xff\xd8image-bytes",
+    )
+
+    summary = databot.summarize_uploaded_file(uploaded_file)
+
+    assert "File: error-screenshot.jpg" in summary
+    assert "Type: image" in summary
+    assert "Image attached for visual analysis" in summary
+    assert "image-bytes" not in summary
+
+
+def test_vision_model_can_be_configured_separately(monkeypatch):
+    monkeypatch.setenv("OPENAI_VISION_MODEL", "vision-test-model")
+
+    assert databot.get_vision_model() == "vision-test-model"
+
+
+def test_multimodal_reply_sends_image_once_and_stores_text_history():
+    client, completions = fake_client("The chart shows an upward trend.")
+    uploaded_file = SimpleNamespace(
+        name="trend.webp",
+        type="image/webp",
+        getvalue=lambda: b"fake-webp-bytes",
+    )
+    user_content = databot.build_user_message_content("Analyze this visual.", [uploaded_file])
+
+    answer, history = databot.get_databot_reply(
+        client=client,
+        model="test-model",
+        conversation_history=databot.create_conversation_history(),
+        user_input=user_content,
+    )
+
+    assert answer == "The chart shows an upward trend."
+    request_messages = completions.calls[0]["messages"]
+    assert request_messages[-1]["content"][1]["type"] == "image_url"
+    assert "base64" in request_messages[-1]["content"][1]["image_url"]["url"]
+    assert isinstance(history[-2]["content"], str)
+    assert "Uploaded 1 image(s)" in history[-2]["content"]
+    assert "base64" not in history[-2]["content"]
+
+
+def test_image_bad_request_mentions_vision_model():
+    error = BadRequestError(
+        "Image inputs are not supported for this model.",
+        response=httpx.Response(400, request=httpx.Request("POST", "https://api.openai.com/v1/chat/completions")),
+        body={"error": {"message": "Image inputs are not supported for this model."}},
+    )
+
+    message = databot.format_openai_error(error)
+
+    assert "OPENAI_VISION_MODEL" in message
+    assert databot.DEFAULT_VISION_MODEL in message
 
 
 def test_extract_urls_deduplicates_and_trims_punctuation():

@@ -33,6 +33,8 @@ DataBot supports file uploads directly in the chat input. Users can attach CSV a
 
 CSV uploads in the artifact generator are used to infer chart labels and numeric values.
 
+DataBot also supports image uploads in the chat input for visual analysis of charts, screenshots, error messages, and other data science outputs. Supported image types are PNG, JPG/JPEG, WEBP, and non-animated GIF. Image questions use `OPENAI_VISION_MODEL` when set; otherwise they use `gpt-4o-mini`.
+
 ## Internet Research and Sentiment Analysis
 
 Open the DataBot page, then expand `Internet research` in the Chat tab.
@@ -92,6 +94,7 @@ copy .env.example .env
 ```text
 OPENAI_API_KEY=your_api_key_here
 OPENAI_MODEL=gpt-4o-mini
+OPENAI_VISION_MODEL=gpt-4o-mini
 ```
 
 The `.env` file is listed in `.gitignore`, so your real API key should stay on your computer and should not be pushed to GitHub.
@@ -101,6 +104,7 @@ The `.env` file is listed in `.gitignore`, so your real API key should stay on y
 ```toml
 OPENAI_API_KEY = "your_api_key_here"
 OPENAI_MODEL = "gpt-4o-mini"
+OPENAI_VISION_MODEL = "gpt-4o-mini"
 ```
 
 The `.streamlit/secrets.toml` file is listed in `.gitignore`, so your real API key should not be pushed to GitHub.
@@ -291,6 +295,7 @@ Main file path: app.py
 ```toml
 OPENAI_API_KEY = "your_real_api_key_here"
 OPENAI_MODEL = "gpt-4o-mini"
+OPENAI_VISION_MODEL = "gpt-4o-mini"
 ```
 
 8. Click `Save`, then click `Deploy`.
@@ -318,6 +323,14 @@ The Streamlit process is started with:
 ```
 
 The app is bound to `127.0.0.1` so it is not exposed directly on the public internet. The public site at `https://clintonnjoku.com` reaches the app through the VPS web/proxy layer, which forwards requests to `127.0.0.1:8501`.
+
+For image uploads on the custom domain, the nginx site configuration must allow request bodies larger than its default. Add this inside the relevant `server` block, then reload nginx:
+
+```nginx
+client_max_body_size 25M;
+```
+
+See `deploy/nginx-databot.conf.example` for a minimal proxy example.
 
 To update the VPS deployment after pushing changes to GitHub:
 
@@ -355,6 +368,8 @@ Logs are written to:
 - If OpenAI says the key has no available quota, check billing, credits, and project limits in your OpenAI Platform account.
 - If you see an API error, check your API key, model name, internet connection, billing status, and rate limits.
 - If the model name does not work for your account, update `OPENAI_MODEL` in `.env` and `.env.example`.
+- If image upload works locally but fails on `clintonnjoku.com`, confirm the VPS has pulled the latest code, installed requirements, restarted Streamlit, and set nginx `client_max_body_size 25M`.
+- If OpenAI rejects an image request, set `OPENAI_VISION_MODEL=gpt-4o-mini` or another vision-capable model in the VPS environment or Streamlit secrets.
 - If `clintonnjoku.com` does not show the latest GitHub changes but the `.streamlit.app` URL does, SSH into the VPS, run `git pull` in `/root/databot`, and restart the local Streamlit process.
 
 ## Notes
