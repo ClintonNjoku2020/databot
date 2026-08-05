@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" role="img" aria-labelledby="title desc">
+  <title id="title">AI technology systems illustration</title>
+  <desc id="desc">A clean AI systems illustration with neural nodes, dashboards, automation cards, and code panels.</desc>
+  <rect width="1200" height="420" rx="32" fill="#0F172A"/>
+  <circle cx="220" cy="210" r="96" fill="#2563EB" opacity=".18"/>
+  <circle cx="220" cy="210" r="16" fill="#14B8A6"/>
+  <circle cx="130" cy="148" r="12" fill="#60A5FA"/>
+  <circle cx="310" cy="142" r="12" fill="#DBEAFE"/>
+  <circle cx="322" cy="276" r="12" fill="#14B8A6"/>
+  <circle cx="128" cy="282" r="12" fill="#DBEAFE"/>
+  <path d="M220 210 L130 148 M220 210 L310 142 M220 210 L322 276 M220 210 L128 282 M130 148 L310 142 M128 282 L322 276" stroke="#EAF2FF" stroke-width="4" opacity=".75"/>
+  <rect x="450" y="74" width="292" height="124" rx="22" fill="#FFFFFF"/>
+  <text x="486" y="124" font-family="Inter, Arial" font-size="24" font-weight="800" fill="#0F172A">Prompt pipeline</text>
+  <rect x="486" y="148" width="190" height="14" rx="7" fill="#64748B"/>
+  <rect x="450" y="226" width="292" height="124" rx="22" fill="#DBEAFE"/>
+  <text x="486" y="276" font-family="Inter, Arial" font-size="24" font-weight="800" fill="#0F172A">Decision support</text>
+  <rect x="486" y="300" width="162" height="14" rx="7" fill="#2563EB"/>
+  <rect x="804" y="74" width="302" height="276" rx="24" fill="#111C35" stroke="#334155" stroke-width="2"/>
+  <text x="846" y="128" font-family="Inter, Arial" font-size="24" font-weight="800" fill="#FFFFFF">Analytics layer</text>
+  <polyline points="850,280 900,246 950,258 1000,196 1050,214" fill="none" stroke="#14B8A6" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="850" y="156" width="205" height="14" rx="7" fill="#64748B"/>
+  <rect x="850" y="184" width="158" height="14" rx="7" fill="#475569"/>
+  <rect x="850" y="312" width="42" height="14" rx="7" fill="#2563EB"/>
+  <rect x="908" y="312" width="42" height="14" rx="7" fill="#14B8A6"/>
+  <rect x="966" y="312" width="42" height="14" rx="7" fill="#DBEAFE"/>
+</svg>

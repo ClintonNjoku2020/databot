@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">DataBot demo preview</title>
+  <desc id="desc">Screenshot style preview of a data science chatbot with chart and file generation panels.</desc>
+  <rect width="1200" height="760" rx="32" fill="#F8FAFC"/>
+  <rect x="48" y="52" width="1104" height="656" rx="28" fill="#FFFFFF" stroke="#D8E0EA" stroke-width="3"/>
+  <rect x="48" y="52" width="1104" height="82" rx="28" fill="#0F172A"/>
+  <circle cx="96" cy="93" r="11" fill="#14B8A6"/>
+  <circle cx="132" cy="93" r="11" fill="#60A5FA"/>
+  <circle cx="168" cy="93" r="11" fill="#CBD5E1"/>
+  <text x="218" y="102" font-family="Inter, Arial" font-size="28" font-weight="700" fill="#FFFFFF">DataBot</text>
+  <rect x="82" y="168" width="300" height="486" rx="22" fill="#EFF6FF" stroke="#DBEAFE" stroke-width="2"/>
+  <text x="116" y="218" font-family="Inter, Arial" font-size="22" font-weight="700" fill="#0F172A">Uploaded dataset</text>
+  <rect x="116" y="250" width="220" height="16" rx="8" fill="#94A3B8"/>
+  <rect x="116" y="285" width="180" height="16" rx="8" fill="#CBD5E1"/>
+  <rect x="116" y="342" width="220" height="168" rx="18" fill="#FFFFFF" stroke="#D8E0EA"/>
+  <rect x="146" y="446" width="24" height="40" rx="6" fill="#14B8A6"/>
+  <rect x="190" y="404" width="24" height="82" rx="6" fill="#2563EB"/>
+  <rect x="234" y="376" width="24" height="110" rx="6" fill="#14B8A6"/>
+  <rect x="278" y="338" width="24" height="148" rx="6" fill="#2563EB"/>
+  <rect x="430" y="172" width="640" height="88" rx="22" fill="#F8FAFC" stroke="#D8E0EA"/>
+  <text x="466" y="224" font-family="Inter, Arial" font-size="24" font-weight="700" fill="#0F172A">How do I explain model overfitting?</text>
+  <rect x="540" y="298" width="530" height="178" rx="22" fill="#DBEAFE"/>
+  <text x="578" y="352" font-family="Inter, Arial" font-size="24" font-weight="700" fill="#0F172A">DataBot response</text>
+  <rect x="578" y="386" width="410" height="16" rx="8" fill="#64748B"/>
+  <rect x="578" y="420" width="340" height="16" rx="8" fill="#94A3B8"/>
+  <rect x="430" y="520" width="640" height="82" rx="22" fill="#F8FAFC" stroke="#D8E0EA"/>
+  <text x="466" y="571" font-family="Inter, Arial" font-size="22" font-weight="700" fill="#2563EB">Generate PDF, chart, diagram, PowerPoint</text>
+</svg>
