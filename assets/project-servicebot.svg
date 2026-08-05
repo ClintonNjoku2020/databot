@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">ServiceBot demo preview</title>
+  <desc id="desc">Screenshot style preview of a customer support chatbot with booking, live call, feedback, and agent handoff panels.</desc>
+  <rect width="1200" height="760" rx="32" fill="#F8FAFC"/>
+  <rect x="62" y="52" width="1076" height="656" rx="28" fill="#FFFFFF" stroke="#D8E0EA" stroke-width="3"/>
+  <rect x="62" y="52" width="1076" height="94" rx="28" fill="#2563EB"/>
+  <text x="112" y="112" font-family="Inter, Arial" font-size="30" font-weight="800" fill="#FFFFFF">ServiceBot</text>
+  <rect x="106" y="184" width="270" height="94" rx="18" fill="#EFF6FF" stroke="#DBEAFE"/>
+  <text x="134" y="228" font-family="Inter, Arial" font-size="21" font-weight="700" fill="#0F172A">Book support call</text>
+  <rect x="134" y="246" width="168" height="13" rx="7" fill="#64748B"/>
+  <rect x="412" y="184" width="270" height="94" rx="18" fill="#CCFBF1" stroke="#99F6E4"/>
+  <text x="440" y="228" font-family="Inter, Arial" font-size="21" font-weight="700" fill="#0F172A">Start live call</text>
+  <rect x="440" y="246" width="150" height="13" rx="7" fill="#0F766E"/>
+  <rect x="718" y="184" width="270" height="94" rx="18" fill="#F8FAFC" stroke="#D8E0EA"/>
+  <text x="746" y="228" font-family="Inter, Arial" font-size="21" font-weight="700" fill="#0F172A">Feedback</text>
+  <rect x="746" y="246" width="128" height="13" rx="7" fill="#64748B"/>
+  <rect x="132" y="330" width="400" height="86" rx="24" fill="#F8FAFC" stroke="#D8E0EA"/>
+  <text x="166" y="382" font-family="Inter, Arial" font-size="22" font-weight="700" fill="#0F172A">I need help with billing.</text>
+  <rect x="506" y="450" width="520" height="122" rx="24" fill="#DBEAFE"/>
+  <text x="542" y="502" font-family="Inter, Arial" font-size="22" font-weight="800" fill="#0F172A">ServiceBot reply</text>
+  <rect x="542" y="530" width="376" height="15" rx="8" fill="#64748B"/>
+  <rect x="542" y="558" width="302" height="15" rx="8" fill="#94A3B8"/>
+  <rect x="132" y="610" width="894" height="44" rx="22" fill="#0F172A"/>
+  <text x="168" y="640" font-family="Inter, Arial" font-size="18" font-weight="700" fill="#FFFFFF">Escalation handoff, uploads, agent review, notifications</text>
+</svg>

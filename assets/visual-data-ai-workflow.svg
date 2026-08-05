@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
+  <title id="title">Data visualisation and AI workflow illustration</title>
+  <desc id="desc">A professional data workflow illustration with charts, data pipelines, and AI model nodes.</desc>
+  <rect width="1200" height="520" rx="32" fill="#FFFFFF"/>
+  <rect x="48" y="52" width="300" height="368" rx="28" fill="#F8FAFC" stroke="#D8E0EA" stroke-width="3"/>
+  <text x="82" y="112" font-family="Inter, Arial" font-size="26" font-weight="800" fill="#0F172A">Raw data</text>
+  <rect x="82" y="154" width="220" height="18" rx="9" fill="#CBD5E1"/>
+  <rect x="82" y="198" width="180" height="18" rx="9" fill="#DBEAFE"/>
+  <rect x="82" y="242" width="236" height="18" rx="9" fill="#CBD5E1"/>
+  <rect x="82" y="286" width="150" height="18" rx="9" fill="#DBEAFE"/>
+  <path d="M378 244 C455 180 510 180 586 244" fill="none" stroke="#2563EB" stroke-width="10" stroke-linecap="round"/>
+  <path d="M378 304 C455 368 510 368 586 304" fill="none" stroke="#14B8A6" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="482" cy="244" r="14" fill="#2563EB"/>
+  <circle cx="482" cy="304" r="14" fill="#14B8A6"/>
+  <rect x="620" y="84" width="248" height="312" rx="28" fill="#0F172A"/>
+  <text x="662" y="146" font-family="Inter, Arial" font-size="25" font-weight="800" fill="#FFFFFF">AI model</text>
+  <circle cx="706" cy="228" r="24" fill="#14B8A6"/>
+  <circle cx="792" cy="180" r="18" fill="#60A5FA"/>
+  <circle cx="806" cy="288" r="22" fill="#DBEAFE"/>
+  <path d="M706 228 L792 180 L806 288 L706 228" fill="none" stroke="#EAF2FF" stroke-width="4" opacity=".85"/>
+  <path d="M868 250 C924 238 950 212 1004 176" fill="none" stroke="#14B8A6" stroke-width="10" stroke-linecap="round"/>
+  <rect x="922" y="118" width="230" height="294" rx="28" fill="#EFF6FF" stroke="#DBEAFE" stroke-width="3"/>
+  <text x="960" y="178" font-family="Inter, Arial" font-size="25" font-weight="800" fill="#0F172A">Insight</text>
+  <rect x="962" y="318" width="26" height="52" rx="7" fill="#14B8A6"/>
+  <rect x="1010" y="274" width="26" height="96" rx="7" fill="#2563EB"/>
+  <rect x="1058" y="226" width="26" height="144" rx="7" fill="#14B8A6"/>
+  <circle cx="1036" cy="212" r="42" fill="none" stroke="#2563EB" stroke-width="14"/>
+  <path d="M1036 170 A42 42 0 0 1 1078 212" fill="none" stroke="#14B8A6" stroke-width="14" stroke-linecap="round"/>
+</svg>
