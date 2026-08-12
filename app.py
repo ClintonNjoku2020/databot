@@ -903,8 +903,9 @@ def load_css():
             border-color: var(--accent);
         }
 
-        .stApp {
-            padding-top: 56px;
+        [data-testid="stAppViewBlockContainer"],
+        [data-testid="stMainBlockContainer"] {
+            padding-top: calc(56px + .9rem) !important;
         }
 
 
@@ -919,7 +920,7 @@ def load_css():
 
         @media (max-width: 900px) {
             [data-testid="stAppViewBlockContainer"] {
-                padding-top: .65rem;
+                padding-top: calc(56px + .65rem) !important;
                 padding-left: 1.25rem;
                 padding-right: 1.25rem;
             }
@@ -956,7 +957,7 @@ def load_css():
 
         @media (max-width: 700px) {
             [data-testid="stAppViewBlockContainer"] {
-                padding: .25rem .85rem 3.25rem;
+                padding: calc(56px + .25rem) .85rem 3.25rem !important;
             }
 
             [data-testid="stVerticalBlock"] {
@@ -1007,33 +1008,6 @@ def load_css():
                 min-height: 0 !important;
                 overflow: visible !important;
                 padding: 0 !important;
-            }
-
-            .mobile-nav {
-                display: flex;
-                gap: .45rem;
-                margin: 0 0 .45rem;
-                overflow-x: auto;
-                padding: 0 0 .35rem;
-                scrollbar-width: none;
-                -webkit-overflow-scrolling: touch;
-            }
-
-            .mobile-nav::-webkit-scrollbar {
-                display: none;
-            }
-
-            .mobile-nav a {
-                flex: 0 0 auto;
-                background: var(--primary);
-                border: 1px solid var(--primary);
-                border-radius: 4px;
-                color: white !important;
-                font-size: .88rem;
-                font-weight: 700;
-                line-height: 1;
-                padding: .62rem .72rem;
-                text-decoration: none !important;
             }
 
             .hero {
