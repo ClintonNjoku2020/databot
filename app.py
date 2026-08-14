@@ -1,9 +1,11 @@
 import base64
 import html
 import importlib.util
+import json
 from pathlib import Path
 import sys
 import urllib.parse
+import urllib.request
 
 import streamlit as st
 from openai import OpenAIError
@@ -532,20 +534,71 @@ def load_css():
             background: linear-gradient(135deg, var(--primary-soft), var(--accent-soft));
             border: 1px solid var(--line-strong);
             border-radius: 6px;
-            display: grid;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
             min-height: 220px;
             overflow: hidden;
-            padding: .8rem;
-            place-items: center;
+            padding: 1rem;
         }
 
-        .github-stats-card img {
-            background: rgba(255, 255, 255, .78);
+        .github-stats-head {
+            align-items: center;
+            display: flex;
+            gap: .72rem;
+            margin-bottom: .9rem;
+        }
+
+        .github-stats-head img {
+            background: rgba(255, 255, 255, .86);
+            border: 1px solid rgba(255, 255, 255, .92);
             border-radius: 6px;
             display: block;
-            height: auto;
-            max-width: 100%;
-            width: 100%;
+            height: 42px;
+            padding: .52rem;
+            width: 42px;
+        }
+
+        .github-stats-head h3 {
+            font-size: 1.12rem;
+            margin: .15rem 0 0;
+        }
+
+        .github-stats-grid {
+            display: grid;
+            gap: .65rem;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            margin-bottom: .85rem;
+        }
+
+        .github-stat {
+            background: rgba(255, 255, 255, .76);
+            border: 1px solid rgba(255, 255, 255, .88);
+            border-radius: 6px;
+            padding: .72rem .65rem;
+        }
+
+        .github-stat strong {
+            color: var(--ink);
+            display: block;
+            font-family: "Poppins", "Inter", sans-serif;
+            font-size: 1.25rem;
+            line-height: 1;
+            margin-bottom: .28rem;
+        }
+
+        .github-stat span,
+        .github-stats-card p {
+            color: var(--muted);
+            font-size: .82rem;
+        }
+
+        .github-stats-card p {
+            margin: 0 0 .85rem;
+        }
+
+        .github-stats-card p strong {
+            color: var(--ink);
         }
 
         .project-grid {
@@ -1051,6 +1104,10 @@ def load_css():
 
             .site-footer-links {
                 justify-content: flex-start;
+            }
+
+            .github-stats-grid {
+                grid-template-columns: 1fr;
             }
 
             .home-about,
@@ -1576,10 +1633,75 @@ def page_heading(kicker, title, description):
     )
 
 
+@st.cache_data(ttl=3600, show_spinner=False)
+def fetch_github_activity(username):
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "clinton-njoku-portfolio",
+    }
+
+    def get_json(url):
+        request = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(request, timeout=5) as response:
+            return json.loads(response.read().decode("utf-8"))
+
+    try:
+        profile = get_json(f"https://api.github.com/users/{username}")
+        repos = get_json(f"https://api.github.com/users/{username}/repos?per_page=100&sort=updated")
+    except Exception:
+        return {
+            "public_repos": "20+",
+            "followers": "Profile",
+            "stars": "Live",
+            "latest_repo": "GitHub portfolio",
+            "profile_url": f"https://github.com/{username}",
+        }
+
+    stars = sum(repo.get("stargazers_count", 0) for repo in repos)
+    latest_repo = next((repo.get("name") for repo in repos if repo.get("name")), "Recent work")
+    return {
+        "public_repos": profile.get("public_repos", len(repos)),
+        "followers": profile.get("followers", 0),
+        "stars": stars,
+        "latest_repo": latest_repo,
+        "profile_url": profile.get("html_url", f"https://github.com/{username}"),
+    }
+
+
+def github_activity_markup(username):
+    activity = fetch_github_activity(username)
+    metrics = (
+        ("Public repos", activity["public_repos"]),
+        ("Followers", activity["followers"]),
+        ("Stars", activity["stars"]),
+    )
+    metric_markup = "\n".join(
+        f'                    <div class="github-stat"><strong>{html.escape(str(value))}</strong><span>{html.escape(label)}</span></div>'
+        for label, value in metrics
+    )
+    return f"""
+            <div class="github-stats-card" aria-label="GitHub activity stats for {html.escape(username)}">
+                <div class="github-stats-head">
+                    <img src="https://cdn.simpleicons.org/github/0F172A" alt="" aria-hidden="true">
+                    <div>
+                        <div class="project-label">GitHub Activity</div>
+                        <h3>{html.escape(username)}</h3>
+                    </div>
+                </div>
+                <div class="github-stats-grid">
+{metric_markup}
+                </div>
+                <p>Latest public update: <strong>{html.escape(str(activity["latest_repo"]))}</strong></p>
+                <a class="project-action primary" href="{html.escape(activity["profile_url"], quote=True)}" target="_blank" rel="noopener noreferrer">View GitHub profile</a>
+            </div>
+"""
+
+
 def home():
     hero_image = image_data_uri(ASSET_DIR / "ai-portfolio-hero.png")
     visual_data_ai_workflow = image_data_uri(ASSET_DIR / "visual-data-ai-workflow.svg")
     visual_ai_systems = image_data_uri(ASSET_DIR / "visual-ai-systems.svg")
+    github_activity = github_activity_markup("ClintonNjoku2020")
     st.markdown(
         f"""
         <section class="hero" style="background-image: url('{hero_image}')">
@@ -1668,7 +1790,7 @@ def home():
         unsafe_allow_html=True,
     )
     st.markdown(
-        """
+        f"""
         <section class="social-proof" aria-label="Tools, platforms, and GitHub activity">
             <div>
                 <div class="eyebrow">Social proof</div>
@@ -1681,9 +1803,7 @@ def home():
                     <div class="platform-logo"><img src="https://cdn.simpleicons.org/kaggle/2563EB" alt="Kaggle logo"><strong>Kaggle</strong></div>
                 </div>
             </div>
-            <div class="github-stats-card">
-                <img src="https://github-readme-stats.vercel.app/api?username=ClintonNjoku2020&show_icons=true&theme=transparent&hide_border=true&title_color=0F172A&text_color=64748B&icon_color=14B8A6&ring_color=2563EB" alt="GitHub activity stats for ClintonNjoku2020">
-            </div>
+{github_activity}
         </section>        <div class="section-intro">
             <div class="eyebrow">Selected work</div>
             <h2>Building at the intersection of data and people</h2>
