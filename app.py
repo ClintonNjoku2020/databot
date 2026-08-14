@@ -17,11 +17,11 @@ SOCIAL_LINKS = (
     (
         "LinkedIn",
         "https://www.linkedin.com/in/clinton-njoku-6775752b4/",
-        "https://cdn.simpleicons.org/linkedin/2563EB",
+        '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.58c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.13 1.44-2.13 2.94v5.68H9.35V8.98h3.41v1.57h.05a3.74 3.74 0 0 1 3.37-1.85c3.6 0 4.27 2.37 4.27 5.46v6.29zM5.34 7.41a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zm1.78 13.04H3.56V8.98h3.56v11.47z"></path></svg>',
     ),
     (
         "GitHub",
-        "https://github.com/ClintonNjoku202",
+        "https://github.com/ClintonNjoku2020",
         "https://cdn.simpleicons.org/github/0F172A",
     ),
     (
@@ -964,7 +964,8 @@ def load_css():
             outline: none;
         }
 
-        .site-footer-link img {
+        .site-footer-link img,
+        .site-footer-link svg {
             display: block;
             height: 22px;
             width: 22px;
@@ -1493,15 +1494,20 @@ def mobile_navigation(active_path):
     )
 
 
+def footer_icon_markup(icon_source):
+    if icon_source.startswith("<svg"):
+        return icon_source
+    return f'<img src="{html.escape(icon_source, quote=True)}" alt="" aria-hidden="true">'
+
+
 def site_footer():
     social_links = "\n".join(
         (
             f'                <a class="site-footer-link" href="{html.escape(url, quote=True)}" '
             f'target="_blank" rel="noopener noreferrer" aria-label="{html.escape(label)}" '
-            f'title="{html.escape(label)}">'
-            f'<img src="{html.escape(icon_url, quote=True)}" alt="" aria-hidden="true"></a>'
+            f'title="{html.escape(label)}">{footer_icon_markup(icon_source)}</a>'
         )
-        for label, url, icon_url in SOCIAL_LINKS
+        for label, url, icon_source in SOCIAL_LINKS
     )
     st.markdown(
         f"""
