@@ -12,6 +12,34 @@ import artifact_generator
 
 
 ASSET_DIR = Path(__file__).parent / "assets"
+CONTACT_EMAIL = "clinton.njoku@gmail.com"
+SOCIAL_LINKS = (
+    (
+        "LinkedIn",
+        "https://www.linkedin.com/in/clinton-njoku-6775752b4/",
+        "https://cdn.simpleicons.org/linkedin/2563EB",
+    ),
+    (
+        "GitHub",
+        "https://github.com/ClintonNjoku202",
+        "https://cdn.simpleicons.org/github/0F172A",
+    ),
+    (
+        "Kaggle",
+        "https://www.kaggle.com/clintonnjoku",
+        "https://cdn.simpleicons.org/kaggle/20BEFF",
+    ),
+    (
+        "Hugging Face",
+        "https://huggingface.co/ClintonNjoku",
+        "https://cdn.simpleicons.org/huggingface/FF9D00",
+    ),
+    (
+        "Email",
+        f"mailto:{CONTACT_EMAIL}",
+        "https://cdn.simpleicons.org/gmail/EA4335",
+    ),
+)
 
 
 def load_project_module(module_name):
@@ -843,6 +871,31 @@ def load_css():
             margin-bottom: 0;
         }
 
+        .feature-card-icon {
+            align-items: center;
+            background: var(--primary-soft);
+            border: 1px solid #BFDBFE;
+            border-radius: 6px;
+            color: var(--primary);
+            display: inline-flex;
+            height: 46px;
+            justify-content: center;
+            margin-bottom: .8rem;
+            width: 46px;
+        }
+
+        .feature-card-icon.accent {
+            background: var(--accent-soft);
+            border-color: #99F6E4;
+            color: #0F766E;
+        }
+
+        .feature-card-icon svg {
+            display: block;
+            height: 25px;
+            width: 25px;
+        }
+
         .contact-note {
             background: var(--ink);
             border-radius: 6px;
@@ -861,6 +914,60 @@ def load_css():
         .contact-note p {
             color: #E2E8F0;
             margin-bottom: 0;
+        }
+
+        .site-footer {
+            border-top: 1px solid var(--line);
+            margin-top: 2rem;
+            padding: 1.2rem 0 .15rem;
+        }
+
+        .site-footer-inner {
+            align-items: center;
+            display: flex;
+            gap: 1rem;
+            justify-content: space-between;
+        }
+
+        .site-footer-name {
+            color: var(--ink);
+            font-family: "Poppins", "Inter", sans-serif;
+            font-size: .95rem;
+            font-weight: 700;
+        }
+
+        .site-footer-links {
+            align-items: center;
+            display: flex;
+            flex-wrap: wrap;
+            gap: .55rem;
+            justify-content: flex-end;
+        }
+
+        .site-footer-link {
+            align-items: center;
+            background: var(--white);
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            color: var(--ink) !important;
+            display: inline-flex;
+            height: 42px;
+            justify-content: center;
+            text-decoration: none !important;
+            width: 42px;
+        }
+
+        .site-footer-link:hover,
+        .site-footer-link:focus {
+            border-color: var(--primary);
+            box-shadow: 0 8px 20px rgba(37, 99, 235, .14);
+            outline: none;
+        }
+
+        .site-footer-link img {
+            display: block;
+            height: 22px;
+            width: 22px;
         }
 
         .mobile-nav {
@@ -898,9 +1005,11 @@ def load_css():
             white-space: nowrap;
         }
 
-        .mobile-nav a.primary {
-            background: var(--accent);
-            border-color: var(--accent);
+        .mobile-nav a.active,
+        .mobile-nav a[aria-current="page"] {
+            background: var(--primary);
+            border-color: var(--primary);
+            box-shadow: inset 0 -3px 0 rgba(255, 255, 255, .9);
         }
 
         [data-testid="stAppViewBlockContainer"],
@@ -932,6 +1041,15 @@ def load_css():
                 width: 100% !important;
                 flex: 1 1 100% !important;
                 min-width: 0 !important;
+            }
+
+            .site-footer-inner {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .site-footer-links {
+                justify-content: flex-start;
             }
 
             .home-about,
@@ -1345,17 +1463,56 @@ def load_css():
     )
 
 
-def mobile_navigation():
+NAV_ITEMS = (
+    ("Home", "", "/"),
+    ("About", "about", "/about"),
+    ("DataBot", "databot", "/databot"),
+    ("ServiceBot", "servicebot-project", "/servicebot-project"),
+    ("Projects", "projects", "/projects"),
+    ("Contact", "contact", "/contact"),
+)
+
+
+def mobile_navigation(active_path):
+    active_path = (active_path or "").strip("/")
+    nav_links = "\n".join(
+        (
+            f'            <a class="active" aria-current="page" href="{href}" target="_self">{label}</a>'
+            if path == active_path
+            else f'            <a href="{href}" target="_self">{label}</a>'
+        )
+        for label, path, href in NAV_ITEMS
+    )
     st.markdown(
-        """
+        f"""
         <nav class="mobile-nav" aria-label="Mobile navigation">
-            <a href="/" target="_self">Home</a>
-            <a href="/about" target="_self">About</a>
-            <a class="primary" href="/databot" target="_self">DataBot</a>
-            <a href="/servicebot-project" target="_self">ServiceBot</a>
-            <a href="/projects" target="_self">Projects</a>
-            <a href="/contact" target="_self">Contact</a>
+{nav_links}
         </nav>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def site_footer():
+    social_links = "\n".join(
+        (
+            f'                <a class="site-footer-link" href="{html.escape(url, quote=True)}" '
+            f'target="_blank" rel="noopener noreferrer" aria-label="{html.escape(label)}" '
+            f'title="{html.escape(label)}">'
+            f'<img src="{html.escape(icon_url, quote=True)}" alt="" aria-hidden="true"></a>'
+        )
+        for label, url, icon_url in SOCIAL_LINKS
+    )
+    st.markdown(
+        f"""
+        <div class="site-footer" role="contentinfo">
+            <div class="site-footer-inner">
+                <div class="site-footer-name">Clinton Njoku</div>
+                <div class="site-footer-links" aria-label="Social links">
+{social_links}
+                </div>
+            </div>
+        </div>
         """,
         unsafe_allow_html=True,
     )
@@ -1553,8 +1710,8 @@ def home():
                 <div class="project-card-body">
                     <div class="project-label">02 · CUSTOMER SUPPORT AI</div>
                     <h3>ServiceBot</h3>
-                    <p>A support chatbot with file uploads, context tracking, frustration detection, call booking, live call links, feedback, and agent escalation handoff pages.</p>
-                    <div class="tags"><span class="tag">Python</span><span class="tag">Flask</span><span class="tag">GPT-4o-mini</span><span class="tag">OpenAI API</span><span class="tag">Codex</span></div>
+                    <p>A support chatbot that accepts billing documents, screenshots, CSV files, and other uploads while managing context tracking, frustration detection, call booking, live call links, feedback, and agent escalation handoff pages.</p>
+                    <div class="tags"><span class="tag">File uploads</span><span class="tag">Python</span><span class="tag">Flask</span><span class="tag">GPT-4o-mini</span><span class="tag">OpenAI API</span><span class="tag">Codex</span></div>
                     <div class="project-card-actions">
                         <a class="project-action primary" href="https://clintonnjoku.com/servicebot/" target="_blank">Live demo</a>
                         <a class="project-action" href="https://github.com/ClintonNjoku2020/servicebot" target="_blank">GitHub</a>
@@ -2064,21 +2221,54 @@ def servicebot_page():
         </section>
         <div class="contact-card-grid">
             <article class="contact-card">
+                <div class="feature-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"></path>
+                        <path d="M8 9h8"></path>
+                        <path d="M8 13h5"></path>
+                    </svg>
+                </div>
                 <div class="project-label">01 · CONVERSATION</div>
                 <h3>Context-aware support</h3>
                 <p>Keeps the support flow focused while helping users describe problems, attach files, and get useful next steps.</p>
             </article>
             <article class="contact-card">
+                <div class="feature-card-icon accent" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M7 7h6a4 4 0 0 1 4 4v6"></path>
+                        <path d="M17 17l-3-3"></path>
+                        <path d="M17 17l3-3"></path>
+                        <path d="M5 17h6a4 4 0 0 0 4-4V7"></path>
+                        <path d="M7 7l3 3"></path>
+                        <path d="M7 7l-3 3"></path>
+                    </svg>
+                </div>
                 <div class="project-label">02 · ESCALATION</div>
                 <h3>Human handoff paths</h3>
                 <p>Detects frustration signals and provides structured escalation options, including booking and live-call flows.</p>
             </article>
             <article class="contact-card">
+                <div class="feature-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 21s-7-4.35-7-10a4 4 0 0 1 7-2.65A4 4 0 0 1 19 11c0 5.65-7 10-7 10z"></path>
+                        <path d="M8 12h8"></path>
+                    </svg>
+                </div>
                 <div class="project-label">03 · FEEDBACK</div>
                 <h3>Service quality loop</h3>
                 <p>Captures feedback so the support experience can be reviewed, improved, and connected to real service outcomes.</p>
             </article>
             <article class="contact-card">
+                <div class="feature-card-icon accent" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="4" y="4" width="6" height="6" rx="1.3"></rect>
+                        <rect x="14" y="4" width="6" height="6" rx="1.3"></rect>
+                        <rect x="9" y="14" width="6" height="6" rx="1.3"></rect>
+                        <path d="M10 7h4"></path>
+                        <path d="M7 10v2a2 2 0 0 0 2 2h3"></path>
+                        <path d="M17 10v2a2 2 0 0 1-2 2h-3"></path>
+                    </svg>
+                </div>
                 <div class="project-label">04 · STACK</div>
                 <h3>Python AI tooling</h3>
                 <p>Built with Python, Flask, GPT-4o-mini, OpenAI API workflows, prompt engineering, and Codex-assisted iteration.</p>
@@ -2182,9 +2372,9 @@ def contact():
         "Let's build something useful.",
         "Reach out for data science, prompt engineering, AI assistant, automation, dashboard, or collaboration projects.",
     )
-    contact_email = "clinton.njoku@gmail.com"
-    linkedin_url = "https://www.linkedin.com/in/clinton-njoku-6775752b4/"
-    github_url = "https://github.com/ClintonNjoku2020"
+    contact_email = CONTACT_EMAIL
+    linkedin_url = SOCIAL_LINKS[0][1]
+    github_url = SOCIAL_LINKS[1][1]
     st.markdown(
         f"""
         <section class="contact-shell" aria-label="Contact options">
@@ -2300,7 +2490,6 @@ def contact():
             )
 
 load_css()
-mobile_navigation()
 
 pages = {
     "Portfolio": [
@@ -2314,4 +2503,6 @@ pages = {
 }
 
 navigation = st.navigation(pages, position="top")
+mobile_navigation(navigation.url_path)
 navigation.run()
+site_footer()
