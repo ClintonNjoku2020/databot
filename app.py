@@ -1759,7 +1759,8 @@ def home():
             <div class="home-about-copy">
                 <div class="eyebrow">About Me</div>
                 <h2>Data and AI work with practical delivery.</h2>
-                <p>I design data products, AI assistants, and prompt-driven systems that make analysis easier to understand and easier to act on. This space is prepared for a clear professional headshot so the portfolio feels more personal and credible.</p>
+                <p>I’m a Python Data Scientist and AI Engineer focused on building practical solutions with machine learning, Generative AI, prompt engineering, and LLM applications. My projects, including DataBot, ServiceBot, and OptimBot, demonstrate hands-on experience in developing, testing, and improving AI-powered applications. I build data products, AI assistants, and prompt-driven workflows that turn complex information into clearer decisions. My work combines practical data science, user-focused application design, and modern AI tooling.</p>
+                <p>I am expanding my work from AI application development to AI Automation and Agentic AI, with an interest in creating intelligent systems that improve workflows, support decision-making, and deliver business value. My goal is to build reliable, scalable, and user-focused AI solutions across data science, machine learning, and business workflow automation.</p>
             </div>
         </section>
         """,
@@ -1890,7 +1891,8 @@ def about():
             <div class="home-about-copy">
                 <div class="eyebrow">Professional profile</div>
                 <h2>Engr. Clinton Njoku</h2>
-                <p>I build data products, AI assistants, and prompt-driven workflows that turn complex information into clearer decisions. My work combines practical data science, user-focused application design, and modern AI tooling.</p>
+                <p>I’m a Python Data Scientist and AI Engineer focused on building practical solutions with machine learning, Generative AI, prompt engineering, and LLM applications. My projects, including DataBot, ServiceBot, and OptimBot, demonstrate hands-on experience in developing, testing, and improving AI-powered applications. I build data products, AI assistants, and prompt-driven workflows that turn complex information into clearer decisions. My work combines practical data science, user-focused application design, and modern AI tooling.</p>
+                <p>I am expanding my work from AI application development to AI Automation and Agentic AI, with an interest in creating intelligent systems that improve workflows, support decision-making, and deliver business value. My goal is to build reliable, scalable, and user-focused AI solutions across data science, machine learning, and business workflow automation.</p>
                 <div class="tags"><span class="tag">Data Scientist</span><span class="tag">Prompt Engineer</span><span class="tag">AI System Builder</span></div>
             </div>
         </section>
