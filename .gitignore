@@ -9,3 +9,7 @@ pytest-cache-files-*/
 streamlit.log
 streamlit.err.log
 sample.csv
+
+# Local deployment comparison and backups
+app.live-vps.py
+app.py.backup-before-*

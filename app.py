@@ -312,6 +312,7 @@ def load_css():
             width: 100%;
             height: 100%;
             object-fit: cover;
+            object-position: center 10%;
             display: block;
         }
 
@@ -1598,6 +1599,7 @@ def profile_photo_markup():
         (
             ASSET_DIR / filename
             for filename in (
+                "profile-picture.png",
                 "profile-headshot.png",
                 "profile-headshot.jpg",
                 "profile-headshot.jpeg",
@@ -1814,7 +1816,7 @@ def home():
     )
     databot_preview = image_data_uri(ASSET_DIR / "project-databot.svg")
     servicebot_preview = image_data_uri(ASSET_DIR / "project-servicebot.svg")
-    capstone_preview = image_data_uri(ASSET_DIR / "project-capstone-3.svg")
+    optimbot_preview = image_data_uri(ASSET_DIR / "project-optimbot.svg")
     st.markdown(
         f"""
         <div class="project-grid">
@@ -1845,15 +1847,15 @@ def home():
                 </div>
             </article>
             <article class="project-card">
-                <div class="project-card-media"><img src="{capstone_preview}" alt="Capstone 3 analytics dashboard preview"></div>
+                <div class="project-card-media"><img src="{optimbot_preview}" alt="OptimBot UK Data and AI Career Coach interface preview"></div>
                 <div class="project-card-body">
-                    <div class="project-label">03 · CAPSTONE PROJECT</div>
-                    <h3>Capstone 3</h3>
-                    <p>An analytics capstone focused on turning customer, revenue, adoption, and churn signals into clear business insight and decision-ready recommendations.</p>
-                    <div class="tags"><span class="tag">Python</span><span class="tag">Pandas</span><span class="tag">Streamlit</span><span class="tag">Data Analysis</span><span class="tag">Codex</span></div>
+                    <div class="project-label">03 · AI CAREER COACH</div>
+                    <h3>OptimBot</h3>
+                    <p>A UK-focused Data &amp; AI career coach for grounded CV improvement, skill-gap analysis, portfolio guidance, interview preparation, career transitions, and CV-to-job matching.</p>
+                    <div class="tags"><span class="tag">Python</span><span class="tag">GPT-4o-mini</span><span class="tag">Prompt Engineering</span><span class="tag">OpenAI API</span><span class="tag">Dynamic Few-Shot</span></div>
                     <div class="project-card-actions">
-                        <a class="project-action primary" href="/projects" target="_self">Live demo</a>
-                        <a class="project-action" href="https://github.com/ClintonNjoku2020" target="_blank">GitHub</a>
+                        <a class="project-action primary" href="/optimbot/" target="_self">Live Demo</a>
+                        <a class="project-action" href="https://github.com/ClintonNjoku2020/promptops-capstone3/tree/main/optimbot" target="_blank">GitHub</a>
                     </div>
                 </div>
             </article>
@@ -2417,7 +2419,7 @@ def projects():
     )
     databot_preview = image_data_uri(ASSET_DIR / "project-databot.svg")
     servicebot_preview = image_data_uri(ASSET_DIR / "project-servicebot.svg")
-    capstone_preview = image_data_uri(ASSET_DIR / "project-capstone-3.svg")
+    optimbot_preview = image_data_uri(ASSET_DIR / "project-optimbot.svg")
     st.markdown(
         f"""
         <div class="project-grid">
@@ -2442,13 +2444,13 @@ def projects():
                 </div>
             </article>
             <article class="project-card">
-                <div class="project-card-media"><img src="{capstone_preview}" alt="Capstone 3 analytics dashboard preview"></div>
+                <div class="project-card-media"><img src="{optimbot_preview}" alt="OptimBot UK Data and AI Career Coach interface preview"></div>
                 <div class="project-card-body">
-                    <div class="project-label">03 · CAPSTONE ANALYTICS</div>
-                    <h3>Capstone 3</h3>
-                    <p>An analytics capstone for turning customer, revenue, adoption, and churn signals into recommendations.</p>
-                    <div class="tags"><span class="tag">Python</span><span class="tag">Pandas</span><span class="tag">Scikit-learn</span><span class="tag">Streamlit</span><span class="tag">Analysis</span></div>
-                    <div class="project-card-actions"><a class="project-action primary" href="/projects" target="_self">View details</a><a class="project-action" href="https://github.com/ClintonNjoku2020" target="_blank">GitHub</a></div>
+                    <div class="project-label">03 · AI CAREER COACH</div>
+                    <h3>OptimBot</h3>
+                    <p>A UK-focused career coach for CV improvement, career transitions, portfolio guidance, interview preparation, skill-gap analysis, and grounded CV-to-job matching.</p>
+                    <div class="tags"><span class="tag">Python</span><span class="tag">GPT-4o-mini</span><span class="tag">Dynamic Few-Shot</span><span class="tag">Prompt Chaining</span><span class="tag">Structured Output</span></div>
+                    <div class="project-card-actions"><a class="project-action primary" href="/optimbot/" target="_self">Live Demo</a><a class="project-action" href="https://github.com/ClintonNjoku2020/promptops-capstone3/tree/main/optimbot" target="_blank">GitHub</a></div>
                 </div>
             </article>
         </div>
@@ -2477,15 +2479,15 @@ def projects():
             </div>
         </section>
 
-        <section class="project-story" aria-label="Capstone 3 detailed project story">
-            <div class="project-story-header"><div><div class="project-label">03 · CAPSTONE 3</div><h2>Business analytics shaped for decision-making.</h2><p>Capstone 3 presents analysis work as a decision-support story: define the business question, transform the data, identify patterns, and communicate action.</p></div><div class="project-card-actions"><a class="project-action primary" href="/projects" target="_self">View details</a><a class="project-action" href="https://github.com/ClintonNjoku2020" target="_blank">GitHub</a></div></div>
+        <section class="project-story" aria-label="OptimBot detailed project story">
+            <div class="project-story-header"><div><div class="project-label">03 · OPTIMBOT</div><h2>Grounded career guidance for UK Data &amp; AI roles.</h2><p>OptimBot is a UK-focused Data &amp; AI Career Coach designed to provide practical, evidence-grounded guidance for Data Analyst, Data Scientist, Machine Learning, AI Engineering, and related roles.</p></div><div class="project-card-actions"><a class="project-action primary" href="/optimbot/" target="_self">Live Demo</a><a class="project-action" href="https://github.com/ClintonNjoku2020/promptops-capstone3/tree/main/optimbot" target="_blank">GitHub</a></div></div>
             <div class="project-story-grid">
-                <div class="story-block"><h3>Problem</h3><p>Business datasets can contain churn, revenue, customer, and adoption signals, but value is lost when insights are not tied to decisions.</p></div>
-                <div class="story-block"><h3>Solution</h3><p>An analytics workflow that profiles data, surfaces patterns, visualises key signals, and turns findings into recommendations.</p></div>
-                <div class="story-block"><h3>Key features</h3><ul><li>Data preparation and validation workflow.</li><li>Exploratory analysis of customer, revenue, adoption, and churn signals.</li><li>Visual storytelling through charts and dashboard-style summaries.</li><li>Recommendation-focused reporting for stakeholders.</li></ul></div>
-                <div class="story-block"><h3>Technical decisions</h3><ul><li>Pandas supports transparent data cleaning and transformation.</li><li>Scikit-learn supports model-ready analysis patterns.</li><li>Streamlit makes insights interactive and easy to review.</li><li>Visual summaries keep the project understandable for non-technical readers.</li></ul></div>
-                <div class="story-block"><h3>Stack</h3><p>Python, Pandas, Scikit-learn, Streamlit, data visualisation, exploratory analysis, reporting, Codex.</p></div>
-                <div class="story-block value"><h3>Measurable value</h3><strong>4 insight areas</strong><p>Customer, revenue, adoption, and churn analysis provide a clear structure for explaining risk and opportunity.</p></div>
+                <div class="story-block"><h3>Problem</h3><p>Career advice can become generic or misleading when it assumes experience, skills, achievements, or job-market outcomes that the user has not actually provided.</p></div>
+                <div class="story-block"><h3>Solution</h3><p>A grounded AI career coach that uses supplied evidence to support CV improvement, career planning, skill-gap analysis, portfolio guidance, interview preparation, and CV-to-job matching.</p></div>
+                <div class="story-block"><h3>Key features</h3><ul><li>CV and professional-profile improvement without inventing experience.</li><li>Achievement rewriting without fabricating metrics.</li><li>Portfolio, skill-gap, career-transition, and interview guidance.</li><li>Dynamic selection of two relevant few-shot examples per substantive request.</li><li>Three-step CV/job-description comparison using structured intermediate evidence.</li></ul></div>
+                <div class="story-block"><h3>Technical decisions</h3><ul><li>Structured responses use Observation, Gap identified, Specific action, and Expected outcome.</li><li>Negative prompting protects against unsupported qualifications, metrics, salaries, vacancies, and employment outcomes.</li><li>Dynamic few-shot selection is deterministic and adds no extra model call.</li><li>The CV/job-description workflow separates job analysis, CV evidence extraction, and grounded synthesis.</li></ul></div>
+                <div class="story-block"><h3>Stack</h3><p>Python, OpenAI API, GPT-4o-mini, prompt engineering, dynamic few-shot prompting, negative prompting, structured output, prompt chaining, Codex.</p></div>
+                <div class="story-block value"><h3>Evaluation</h3><strong>160/200 · 80%</strong><p>The final fixed-scenario evaluation recorded 10/10 required-format compliance and 10/10 fabrication-free checks.</p></div>
             </div>
         </section>
         """,

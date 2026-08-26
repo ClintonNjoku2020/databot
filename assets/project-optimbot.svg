@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">OptimBot UK Data and AI Career Coach preview</title>
+  <desc id="desc">Interface preview showing career coaching, CV and job matching, and structured career guidance.</desc>
+
+  <rect width="1200" height="760" rx="32" fill="#F8FAFC"/>
+  <rect x="48" y="52" width="1104" height="656" rx="28" fill="#FFFFFF" stroke="#D8E0EA" stroke-width="3"/>
+
+  <text x="92" y="116" font-family="Inter, Arial" font-size="32" font-weight="800" fill="#0F172A">OptimBot</text>
+  <text x="92" y="151" font-family="Inter, Arial" font-size="20" font-weight="600" fill="#64748B">UK Data &amp; AI Career Coach</text>
+
+  <rect x="92" y="190" width="300" height="110" rx="18" fill="#DBEAFE"/>
+  <text x="122" y="230" font-family="Inter, Arial" font-size="21" font-weight="800" fill="#2563EB">Career Coach</text>
+  <text x="122" y="264" font-family="Inter, Arial" font-size="17" fill="#334155">CV • Skills • Portfolio • Interview</text>
+
+  <rect x="92" y="326" width="300" height="110" rx="18" fill="#CCFBF1"/>
+  <text x="122" y="366" font-family="Inter, Arial" font-size="21" font-weight="800" fill="#0F766E">CV vs Job Match</text>
+  <text x="122" y="400" font-family="Inter, Arial" font-size="17" fill="#334155">Grounded evidence comparison</text>
+
+  <rect x="92" y="462" width="300" height="110" rx="18" fill="#F1F5F9"/>
+  <text x="122" y="502" font-family="Inter, Arial" font-size="21" font-weight="800" fill="#475569">Career Transition</text>
+  <text x="122" y="536" font-family="Inter, Arial" font-size="17" fill="#334155">Data • ML • AI Engineering</text>
+
+  <rect x="444" y="190" width="664" height="382" rx="22" fill="#0F172A"/>
+
+  <text x="488" y="238" font-family="Inter, Arial" font-size="21" font-weight="800" fill="#FFFFFF">Structured guidance</text>
+
+  <rect x="488" y="270" width="260" height="48" rx="12" fill="#1E293B"/>
+  <text x="510" y="301" font-family="Inter, Arial" font-size="17" font-weight="700" fill="#93C5FD">Observation</text>
+
+  <rect x="772" y="270" width="292" height="48" rx="12" fill="#1E293B"/>
+  <text x="794" y="301" font-family="Inter, Arial" font-size="17" font-weight="700" fill="#5EEAD4">Gap identified</text>
+
+  <rect x="488" y="342" width="576" height="54" rx="12" fill="#1E293B"/>
+  <text x="510" y="376" font-family="Inter, Arial" font-size="17" font-weight="700" fill="#FFFFFF">Specific action</text>
+
+  <rect x="488" y="420" width="576" height="54" rx="12" fill="#1E293B"/>
+  <text x="510" y="454" font-family="Inter, Arial" font-size="17" font-weight="700" fill="#FFFFFF">Expected outcome</text>
+
+  <rect x="488" y="500" width="176" height="32" rx="16" fill="#2563EB"/>
+  <text x="520" y="522" font-family="Inter, Arial" font-size="14" font-weight="700" fill="#FFFFFF">Grounded advice</text>
+
+  <rect x="678" y="500" width="170" height="32" rx="16" fill="#0F766E"/>
+  <text x="708" y="522" font-family="Inter, Arial" font-size="14" font-weight="700" fill="#FFFFFF">Dynamic few-shot</text>
+
+  <rect x="862" y="500" width="202" height="32" rx="16" fill="#334155"/>
+  <text x="892" y="522" font-family="Inter, Arial" font-size="14" font-weight="700" fill="#FFFFFF">Prompt chaining</text>
+
+  <text x="92" y="636" font-family="Inter, Arial" font-size="18" font-weight="700" fill="#0F172A">Data Analyst • Data Scientist • Machine Learning • AI Engineering</text>
+  <text x="92" y="671" font-family="Inter, Arial" font-size="16" fill="#64748B">Career guidance grounded in the information you provide.</text>
+</svg>
