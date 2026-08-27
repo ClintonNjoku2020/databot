@@ -1701,7 +1701,7 @@ def github_activity_markup(username):
 
 def home():
     hero_image = image_data_uri(ASSET_DIR / "ai-portfolio-hero.png")
-    visual_data_ai_workflow = image_data_uri(ASSET_DIR / "visual-data-ai-workflow.svg")
+    visual_workflow_automation = image_data_uri(ASSET_DIR / "workflow-automation.svg")
     visual_ai_systems = image_data_uri(ASSET_DIR / "visual-ai-systems.svg")
     github_activity = github_activity_markup("ClintonNjoku2020")
     st.markdown(
@@ -1743,11 +1743,11 @@ def home():
         f"""
         <section class="visual-band" aria-label="Data and AI workflow visual">
             <div class="visual-copy">
-                <div class="eyebrow">From data to decisions</div>
-                <h2>Visual systems for analysis, automation, and AI-assisted insight.</h2>
-                <p>The portfolio now connects the work with visual signals: dashboards, model workflows, conversational interfaces, and decision-support systems.</p>
+                <div class="eyebrow">INTELLIGENT WORKFLOW AUTOMATION.</div>
+                <h2>From AI assistants to prompt-powered tools and intelligent process support systems</h2>
+                <p>AI-driven workflow automation that reduces manual effort, improves consistency, and helps organisations act faster on information, creating solutions that deliver practical business value.</p>
             </div>
-            <div class="visual-media"><img src="{visual_data_ai_workflow}" alt="Data visualisation and AI workflow illustration"></div>
+            <div class="visual-media"><img src="{visual_workflow_automation}" alt="Intelligent workflow automation diagram"></div>
         </section>
         """,
         unsafe_allow_html=True,
