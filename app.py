@@ -1703,6 +1703,7 @@ def home():
     hero_image = image_data_uri(ASSET_DIR / "ai-portfolio-hero.png")
     visual_workflow_automation = image_data_uri(ASSET_DIR / "workflow-automation.svg")
     visual_ai_systems = image_data_uri(ASSET_DIR / "visual-ai-systems.svg")
+    openai_logo = image_data_uri(ASSET_DIR / "openai-logo.svg")
     github_activity = github_activity_markup("ClintonNjoku2020")
     st.markdown(
         f"""
@@ -1800,7 +1801,7 @@ def home():
                 <h2>Platforms and ecosystems I build with.</h2>
                 <p>My work sits inside the modern AI and data ecosystem, combining model APIs, research platforms, notebooks, repositories, and deployable apps.</p>
                 <div class="platform-logos">
-                    <div class="platform-logo"><img src="https://cdn.simpleicons.org/openai/0F172A" alt="OpenAI logo"><strong>OpenAI</strong></div>
+                    <div class="platform-logo"><img src="{openai_logo}" alt="OpenAI logo"><strong>OpenAI</strong></div>
                     <div class="platform-logo"><img src="https://cdn.simpleicons.org/anthropic/0F172A" alt="Anthropic logo"><strong>Anthropic</strong></div>
                     <div class="platform-logo"><img src="https://cdn.simpleicons.org/huggingface/0F172A" alt="Hugging Face logo"><strong>Hugging Face</strong></div>
                     <div class="platform-logo"><img src="https://cdn.simpleicons.org/kaggle/2563EB" alt="Kaggle logo"><strong>Kaggle</strong></div>
