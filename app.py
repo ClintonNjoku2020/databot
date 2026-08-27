@@ -1744,7 +1744,7 @@ def home():
         <section class="visual-band" aria-label="Data and AI workflow visual">
             <div class="visual-copy">
                 <div class="eyebrow">INTELLIGENT WORKFLOW AUTOMATION.</div>
-                <h2>From AI assistants to prompt-powered tools and intelligent process support systems</h2>
+                <h2>From AI assistants to prompt-powered tools and intelligent process support systems.</h2>
                 <p>AI-driven workflow automation that reduces manual effort, improves consistency, and helps organisations act faster on information, creating solutions that deliver practical business value.</p>
             </div>
             <div class="visual-media"><img src="{visual_workflow_automation}" alt="Intelligent workflow automation diagram"></div>
@@ -1809,7 +1809,7 @@ def home():
 {github_activity}
         </section>        <div class="section-intro">
             <div class="eyebrow">Selected work</div>
-            <h2>Building at the intersection of data and people</h2>
+            <h2>Building at the intersection of data and people.</h2>
             <p>My work focuses on approachable tools, reproducible analysis, and machine learning systems designed around real user needs.</p>
         </div>
         """,
