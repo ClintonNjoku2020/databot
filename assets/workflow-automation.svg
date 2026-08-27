@@ -33,11 +33,6 @@
     <rect x="88" y="248" width="164" height="104" rx="8" fill="#FFFFFF" stroke="#BFDBFE"/>
     <text x="170" y="286" text-anchor="middle" fill="#0F172A" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="700">Input / Data</text>
     <text x="170" y="318" text-anchor="middle" fill="#475569" font-family="Inter, Arial, sans-serif" font-size="14">files, prompts, signals</text>
-    <g stroke="#2563EB" stroke-width="3" fill="none">
-      <path d="M130 326h80"/>
-      <path d="M130 302h80"/>
-      <path d="M130 278h80"/>
-    </g>
   </g>
   <g filter="url(#shadow)">
     <rect x="326" y="206" width="192" height="188" rx="8" fill="url(#nodeBlue)"/>
