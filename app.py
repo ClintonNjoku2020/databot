@@ -1961,12 +1961,20 @@ def about():
         </section>
         <div class="section-intro">
             <div class="eyebrow">Certifications</div>
-            <h2>Recent professional credentials.</h2>
+            <h2>Professional Credentials.</h2>
         </div>
         <div class="about-timeline" aria-label="Certification timeline">
             <div class="timeline-item"><span class="timeline-year">2025</span><strong>Artificial Intelligence Engineer</strong><span>Artificial Intelligence Board of America</span></div>
             <div class="timeline-item"><span class="timeline-year">2025</span><strong>Certified Data Science Practitioner</strong><span>CertNexus</span></div>
             <div class="timeline-item"><span class="timeline-year">2024</span><strong>Certified Artificial Intelligence Scientist</strong><span>UNITED STATES ARTIFICIAL INTELLIGENCE INSTITUTE</span></div>
+        </div>
+        <div class="section-intro">
+            <div class="eyebrow">Education</div>
+            <h2>Educational Credentials.</h2>
+        </div>
+        <div class="about-timeline" aria-label="Education timeline">
+            <div class="timeline-item"><span class="timeline-year">2009</span><strong>Master of Engineering (M.Eng.), Electronic Engineering (ICT Option)</strong><span>UNIVERSITY OF NIGERIA, NSUKKA.</span></div>
+            <div class="timeline-item"><span class="timeline-year">1998</span><strong>Bachelor of Technology (B.Tech.), Project Management Technology</strong><span>FEDERAL UNIVERSITY OF TECHNOLOGY, OWERRI.</span></div>
         </div>
         """,
         unsafe_allow_html=True,
