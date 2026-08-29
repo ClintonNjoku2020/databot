@@ -1527,6 +1527,7 @@ NAV_ITEMS = (
     ("About", "about", "/about"),
     ("DataBot", "databot", "/databot"),
     ("ServiceBot", "servicebot-project", "/servicebot-project"),
+    ("OptimBot", "optimbot-project", "/optimbot-project"),
     ("Projects", "projects", "/projects"),
     ("Contact", "contact", "/contact"),
 )
@@ -2423,6 +2424,31 @@ def servicebot_page():
         unsafe_allow_html=True,
     )
 
+def optimbot_page():
+    page_heading(
+        "OptimBot",
+        "UK Data & AI Career Coach.",
+        "A grounded AI career coach for CV improvement, skill-gap analysis, portfolio guidance, interview preparation, career transitions, and CV-to-job matching.",
+    )
+    optimbot_preview = image_data_uri(ASSET_DIR / "project-optimbot.svg")
+    st.markdown(
+        f"""
+        <section class="visual-band" aria-label="OptimBot project overview">
+            <div class="visual-copy">
+                <div class="eyebrow">AI career coaching</div>
+                <h2>Grounded guidance for UK Data &amp; AI careers.</h2>
+                <p>OptimBot uses structured prompting, dynamic few-shot examples, grounding rules, and prompt chaining to provide practical career guidance without inventing experience, qualifications, or outcomes.</p>
+                <div class="project-card-actions">
+                    <a class="project-action primary" href="/optimbot/" target="_self">Open OptimBot app</a>
+                    <a class="project-action" href="https://github.com/ClintonNjoku2020/promptops-capstone3/tree/main/optimbot" target="_blank">View GitHub</a>
+                </div>
+            </div>
+            <div class="visual-media"><img src="{optimbot_preview}" alt="OptimBot UK Data and AI Career Coach interface preview"></div>
+        </section>
+        """,
+        unsafe_allow_html=True,
+    )
+
 def projects():
     page_heading(
         "Projects",
@@ -2637,6 +2663,7 @@ pages = {
         st.Page(about, title="About Me", icon=":material/person:", url_path="about"),
         st.Page(databot_page, title="DataBot", icon=":material/smart_toy:", url_path="databot"),
         st.Page(servicebot_page, title="ServiceBot", icon=":material/support_agent:", url_path="servicebot-project"),
+        st.Page(optimbot_page, title="OptimBot", icon=":material/psychology:", url_path="optimbot-project"),
         st.Page(projects, title="Projects", icon=":material/work:", url_path="projects"),
         st.Page(contact, title="Contact", icon=":material/mail:", url_path="contact"),
     ]
